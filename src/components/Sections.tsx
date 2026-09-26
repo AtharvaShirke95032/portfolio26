@@ -3,11 +3,11 @@
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
 import { entries, profile, projects, skills, type Entry } from "@/lib/data";
-import { Media, PhotoArt } from "./arts";
+import { Photo } from "./arts";
 import { MacWindow, useDesktop } from "./desktop";
 import { EntryDetail, Pill, ProjectDetail, projectArt } from "./details";
 import Draggable from "./Draggable";
-import { Folder, GithubIcon, LinkedinIcon, MailSticker, OldComputer, DocIcon } from "./icons";
+import { Folder, GithubIcon, LinkedinIcon, MailSticker, ClassicMac, DocIcon } from "./icons";
 
 function Chip({ children }: { children: ReactNode }) {
   return (
@@ -100,9 +100,7 @@ export function About() {
             <div className="mt-10 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 overflow-hidden rounded-full ring-2 ring-white shadow">
-                  <Media src={profile.photo} alt={profile.name}>
-                    <PhotoArt />
-                  </Media>
+                  <Photo src={profile.photo} alt={profile.name} caption={false} />
                 </div>
                 <div className="leading-tight">
                   <p className="text-[17px] text-neutral-900">{profile.handle},</p>
@@ -126,7 +124,7 @@ export function About() {
         <MailSticker />
       </Draggable>
       <Draggable id="pc2" label="computer" bounds={ref} style={{ position: "absolute", right: "18%", top: "76%" }} className="hidden lg:block" rotate={4}>
-        <OldComputer className="h-20 w-20" />
+        <ClassicMac className="h-20 w-20" />
       </Draggable>
     </section>
   );

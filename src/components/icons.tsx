@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 type P = { className?: string };
 
@@ -144,27 +144,62 @@ export function BeachBall({ className }: P) {
   );
 }
 
-export function OldComputer({ className }: P) {
+/** Beige classic mac: rainbow stripes on screen, happy mac face on hover. */
+export function ClassicMac({ className = "" }: P) {
+  const id = useId().replace(/:/g, "");
+  const stripes = ["#5ebd3e", "#ffb900", "#f78200", "#e23838", "#973999", "#009cdf"];
   return (
-    <svg viewBox="0 0 80 80" className={className} aria-hidden>
-      <path d="M14 12 58 6l6 42-44 8Z" fill="#e7e3d8" stroke="#6b675d" strokeWidth="1.5" />
-      <path d="M20 17 55 12l4 30-35 6Z" fill="#1e3a8a" stroke="#333" />
-      <path d="M26 24 47 21l2 14-21 3Z" fill="#60a5fa" />
-      <path d="M30 27 43 25l1 7-13 2Z" fill="#fff" opacity="0.8" />
-      <path d="M10 58 66 48l8 12-58 12Z" fill="#d6d2c6" stroke="#6b675d" strokeWidth="1.5" />
-      {Array.from({ length: 18 }).map((_, i) => (
-        <rect
-          key={i}
-          x={20 + (i % 9) * 5.2 - Math.floor(i / 9) * 1}
-          y={57 - (i % 9) * 0.95 + Math.floor(i / 9) * 4.5}
-          width="3.6"
-          height="2.6"
-          rx="0.5"
-          fill="#555"
-          transform={`skewY(-10)`}
-          opacity="0.75"
-        />
-      ))}
+    <svg viewBox="0 0 64 80" className={`group ${className}`} aria-hidden>
+      <defs>
+        <linearGradient id={`${id}-body`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f7f3e8" />
+          <stop offset="1" stopColor="#ddd6c3" />
+        </linearGradient>
+        <linearGradient id={`${id}-bezel`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#cfc8b4" />
+          <stop offset="1" stopColor="#ebe6d8" />
+        </linearGradient>
+        <linearGradient id={`${id}-gloss`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff" stopOpacity="0.55" />
+          <stop offset="0.5" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <clipPath id={`${id}-screen`}>
+          <rect x="13" y="11" width="38" height="30" rx="5" />
+        </clipPath>
+      </defs>
+      {/* shadow + foot */}
+      <ellipse cx="32" cy="77" rx="26" ry="2.5" fill="#000" opacity="0.12" />
+      <rect x="7" y="66" width="50" height="10" rx="2.5" fill="#c9c1ab" stroke="#a79f89" strokeWidth="0.8" />
+      {/* body */}
+      <rect x="5" y="3" width="54" height="68" rx="6" fill={`url(#${id}-body)`} stroke="#b5ad97" strokeWidth="0.9" />
+      <rect x="6" y="4" width="52" height="2" rx="1" fill="#fff" opacity="0.7" />
+      {/* bezel + screen */}
+      <rect x="10" y="8" width="44" height="36" rx="6" fill={`url(#${id}-bezel)`} />
+      <rect x="12" y="10" width="40" height="32" rx="5.5" fill="#1d1d1f" />
+      <g clipPath={`url(#${id}-screen)`}>
+        <rect x="13" y="11" width="38" height="30" fill="#ccccff" />
+        {/* happy mac */}
+        <g fill="#111">
+          <rect x="24" y="19" width="2" height="4" />
+          <rect x="38" y="19" width="2" height="4" />
+          <path d="M32 18h2v8h-3v-2h1Z" />
+          <path d="M25 30h2v2h10v-2h2v2h-2v2H27v-2h-2Z" />
+        </g>
+        <g className="transition-opacity duration-200 group-hover:opacity-0">
+          {stripes.map((c, i) => (
+            <rect key={c} x="13" y={11 + i * 5} width="38" height="5.2" fill={c} />
+          ))}
+        </g>
+        <rect x="13" y="11" width="38" height="30" fill={`url(#${id}-gloss)`} />
+      </g>
+      {/* rainbow badge + floppy slot */}
+      <g>
+        {stripes.map((c, i) => (
+          <rect key={c} x="11" y={55 + i} width="4" height="1" fill={c} />
+        ))}
+      </g>
+      <rect x="31" y="56" width="20" height="2.4" rx="1.2" fill="#3a372f" />
+      <rect x="44" y="55" width="7" height="1" rx="0.5" fill="#b5ad97" />
     </svg>
   );
 }

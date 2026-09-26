@@ -39,6 +39,43 @@ export function TerminalArt({ big }: { big?: boolean }) {
   );
 }
 
+/* reliance-intern: a white terminal full of intern trivia */
+const internScript = [
+  { t: "$ whoami", c: "text-neutral-900" },
+  { t: "atharva · sde intern @ reliance industries", c: "text-neutral-500" },
+  { t: "$ cat internship/fun-facts.txt", c: "text-neutral-900" },
+  { t: "📍 base ............ nagothane, on-site", c: "text-sky-700" },
+  { t: "☕ chai consumed ... lost count by week 2", c: "text-amber-700" },
+  { t: "📦 modules touched . 7+", c: "text-emerald-700" },
+  { t: "📋 reqs → features . 10+", c: "text-emerald-700" },
+  { t: "🦺 hard hats seen .. more than laptops", c: "text-orange-700" },
+  { t: "🧠 learned ......... 'overdue' is a scary word", c: "text-violet-700" },
+  { t: "$ git log -1 --oneline", c: "text-neutral-900" },
+  { t: "a1b2c3d feat: survived my first standup ✨", c: "text-rose-600" },
+];
+
+export function InternTerminalArt({ big }: { big?: boolean }) {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setStep((s) => (s + 1) % (internScript.length + 4)), 650);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div
+      className={`flex h-full w-full flex-col justify-end overflow-hidden bg-[#fbfbf8] p-3 font-mono ${
+        big ? "text-[13px]" : "text-[9.5px]"
+      } leading-relaxed`}
+    >
+      {internScript.slice(0, Math.min(step + 1, internScript.length)).map((l) => (
+        <div key={l.t} className={`whitespace-pre ${l.c}`}>
+          {l.t}
+        </div>
+      ))}
+      <span className="caret inline-block h-3 w-1.5 translate-y-0.5 bg-neutral-800" />
+    </div>
+  );
+}
+
 /* outly: a tiny phone map with pulsing event pins */
 export function PhoneArt() {
   const pins = [
@@ -158,6 +195,23 @@ export function CodeArt() {
   );
 }
 
+/** Real photo (or the drawn placeholder) with the little hello caption on top. */
+export function Photo({ src, alt, caption = true }: { src?: string; alt: string; caption?: boolean }) {
+  if (!src) return <PhotoArt />;
+  return (
+    <div className="relative h-full w-full">
+      <Media src={src} alt={alt} className="object-[50%_20%]">
+        {null}
+      </Media>
+      {caption && (
+        <div className="absolute bottom-2 left-2 right-2 rounded bg-black/40 px-1.5 py-0.5 text-center text-[9px] text-white backdrop-blur-sm">
+          hey there, it&apos;s atharva 👋
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PhotoArt({ hint = "public/media/me.jpg" }: { hint?: string }) {
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-end overflow-hidden bg-linear-to-b from-[#cfe0f5] via-[#e6d9f3] to-[#f7d9d0]">
@@ -172,23 +226,6 @@ export function PhotoArt({ hint = "public/media/me.jpg" }: { hint?: string }) {
         hey there, it&apos;s atharva 👋
       </div>
       <span className="sr-only">placeholder — add {hint}</span>
-    </div>
-  );
-}
-
-export function SiteArt() {
-  return (
-    <div className="h-full w-full bg-linear-to-br from-[#130f40] to-[#3b0f5c] p-3 text-white">
-      <div className="flex items-center justify-between text-[8px] text-white/70">
-        <span className="font-bold text-white">TECHFEST</span>
-        <span>events · register · sponsors</span>
-      </div>
-      <div className="mt-4 text-[20px] font-black leading-none tracking-tight">
-        build.
-        <br />
-        <span className="bg-linear-to-r from-fuchsia-400 to-cyan-300 bg-clip-text text-transparent">break. repeat.</span>
-      </div>
-      <div className="mt-3 inline-block rounded-full bg-white px-2 py-0.5 text-[8px] font-bold text-[#130f40]">register →</div>
     </div>
   );
 }

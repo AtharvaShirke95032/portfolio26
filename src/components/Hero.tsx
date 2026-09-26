@@ -3,7 +3,7 @@
 import { useRef, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { motion } from "motion/react";
 import { profile } from "@/lib/data";
-import { CodeArt, DashboardArt, Media, PhoneArt, PhotoArt, TerminalArt } from "./arts";
+import { CodeArt, InternTerminalArt, PhoneArt, Photo, TerminalArt } from "./arts";
 import { MacWindow, useDesktop } from "./desktop";
 import {
   CodeDetail,
@@ -15,7 +15,7 @@ import {
   projectById,
 } from "./details";
 import Draggable from "./Draggable";
-import { BeachBall, DocIcon, Folder, Kaomoji, MailIcon, MailSticker, NameTag, OldComputer, PdfFile } from "./icons";
+import { BeachBall, DocIcon, Folder, Kaomoji, MailIcon, MailSticker, NameTag, ClassicMac, PdfFile } from "./icons";
 
 /** A floating mac window: red = trash it, green = open it big. */
 function FloatWindow({
@@ -127,9 +127,7 @@ export default function Hero() {
       {/* ---------- floating desktop junk ---------- */}
       <FloatWindow id="w-photo" file="me.png" w={150} h={200} pos={{ left: "7%", top: "13%" }} bounds={ref} delay={0.1} className={lg}
         onOpen={() => openModal({ title: "me.png", content: <PhotoDetail />, width: 460 })}>
-        <Media src={profile.photo} alt={profile.name}>
-          <PhotoArt />
-        </Media>
+        <Photo src={profile.photo} alt={profile.name} />
       </FloatWindow>
 
       <Draggable id="tag-blue" label="name tag" bounds={ref} style={{ position: "absolute", left: "4%", top: "15%" }} className="lg:!left-[23%] lg:!top-[10%]" delay={0.2} rotate={-4}>
@@ -180,9 +178,9 @@ export default function Hero() {
         <Folder className="h-[56px] w-[70px]" label="projects" />
       </Draggable>
 
-      <FloatWindow id="w-reliance" file="reliance-compliance.app" w={300} h={170} pos={{ left: "4%", top: "64%" }} bounds={ref} delay={0.25} className={lg}
-        onOpen={() => openModal({ title: "reliance.app", content: <EntryDetail e={entryById("reliance")} />, width: 640 })}>
-        <DashboardArt />
+      <FloatWindow id="w-reliance" file="reliance-intern" w={300} h={170} pos={{ left: "4%", top: "64%" }} bounds={ref} delay={0.25} className={lg}
+        onOpen={() => openModal({ title: "reliance-intern", content: <EntryDetail e={entryById("reliance")} />, width: 640 })}>
+        <InternTerminalArt />
       </FloatWindow>
 
       <Draggable id="k3" label="(¬_¬)" bounds={ref} style={{ position: "absolute", left: "27%", top: "71%" }} className={lg} delay={0.4}>
@@ -208,8 +206,8 @@ export default function Hero() {
         <Folder color="#f472b6" className="h-[56px] w-[70px]" label="skills" />
       </Draggable>
 
-      <Draggable id="computer" label="old computer" bounds={ref} style={{ position: "absolute", left: "48%", top: "86%" }} className={lg} delay={0.75} rotate={-6}>
-        <OldComputer className="h-16 w-16" />
+      <Draggable id="computer" label="classic mac" bounds={ref} style={{ position: "absolute", left: "48%", top: "86%" }} className={lg} delay={0.75} rotate={-6}>
+        <ClassicMac className="h-16 w-16" />
       </Draggable>
     </section>
   );

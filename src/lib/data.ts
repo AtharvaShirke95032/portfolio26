@@ -14,7 +14,7 @@ export const profile = {
   linkedin: "https://www.linkedin.com/in/atharva-shirke-b30949373",
   resume: "/resume.pdf",
   status: "open to internships & full-time roles",
-  photo: undefined as string | undefined, // e.g. "/media/me.jpg"
+  photo: "/media/me.jpg" as string | undefined,
 };
 
 export const music = {
@@ -76,20 +76,21 @@ export const projects: Project[] = [
     links: [{ label: "github", href: "https://github.com/AtharvaShirke95032" }],
   },
   {
-    id: "techfest",
-    name: "tech fest website",
-    file: "techfest.site",
-    kind: "official college tech fest site",
-    dates: "jan 2023",
+    id: "reliance",
+    name: "napl compliance system",
+    file: "reliance-compliance.app",
+    kind: "statutory compliance platform · reliance industries",
+    dates: "jul 2026 — aug 2026",
     blurb:
-      "led the build of the official tech fest website as core team member & webmaster — the front door for every registration.",
+      "one place to track every law a plant has to follow — who owns it, when it's due, and what's overdue. built during my internship at reliance.",
     bullets: [
-      "responsive, engaging site built for the whole fest",
-      "owned deployment and live updates during the event",
-      "worked with design, marketing and ops to ship what the event needed",
+      "7+ modules: law master, law mapping, compliance status, extension requests, role management, certificates and reports",
+      "workflows tracking compliance status, due dates, extensions and overdue activities",
+      "role-based access control so each user only sees and signs off what they own",
+      "10+ business requirements from the it team turned into shipped features",
     ],
-    stack: ["HTML", "CSS", "JavaScript"],
-    stat: { value: "1", label: "whole fest online" },
+    stack: ["AngularJS", "Express", "SQL", "SSMS"],
+    stat: { value: "7+", label: "modules" },
     links: [],
   },
 ];

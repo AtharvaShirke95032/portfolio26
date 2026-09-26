@@ -2,13 +2,13 @@
 
 import type { ReactNode } from "react";
 import { entries, profile, projects, type Entry, type Project } from "@/lib/data";
-import { CodeArt, DashboardArt, Media, PhoneArt, PhotoArt, SiteArt, TerminalArt } from "./arts";
+import { CodeArt, DashboardArt, InternTerminalArt, Media, PhoneArt, Photo, TerminalArt } from "./arts";
 import { useDesktop } from "./desktop";
 import { Folder } from "./icons";
 
 export function projectArt(p: Project, big?: boolean): ReactNode {
   const art =
-    p.id === "outly" ? <PhoneArt /> : p.id === "readme-ai" ? <TerminalArt big={big} /> : <SiteArt />;
+    p.id === "outly" ? <PhoneArt /> : p.id === "readme-ai" ? <TerminalArt big={big} /> : <DashboardArt />;
   return (
     <Media src={p.image} alt={p.name}>
       {art}
@@ -77,8 +77,8 @@ export function EntryDetail({ e }: { e: Entry }) {
   return (
     <div>
       {e.id === "reliance" && (
-        <div className="h-56 overflow-hidden border-b border-black/5">
-          <DashboardArt />
+        <div className="h-64 overflow-hidden border-b border-black/5">
+          <InternTerminalArt big />
         </div>
       )}
       <div className="space-y-4 p-6">
@@ -113,9 +113,7 @@ export function EntryDetail({ e }: { e: Entry }) {
 export function PhotoDetail() {
   return (
     <div className="aspect-[4/5] w-full">
-      <Media src={profile.photo} alt={profile.name}>
-        <PhotoArt />
-      </Media>
+      <Photo src={profile.photo} alt={profile.name} />
     </div>
   );
 }
@@ -129,16 +127,21 @@ export function CodeDetail() {
 }
 
 export function ProjectsFinder() {
-  const { openModal } = useDesktop();
+  const { openModal, closeModal } = useDesktop();
+  const goTo = (id: string) => {
+    closeModal();
+    // let the modal start its exit before scrolling underneath it
+    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }));
+  };
   const colors = ["#7cb6f0", "#f472b6", "#a78bfa"];
   return (
     <div className="flex min-h-[260px]">
       <aside className="hidden w-40 shrink-0 space-y-1 border-r border-black/5 bg-neutral-50/80 p-3 text-[13px] text-neutral-500 sm:block">
         <p className="px-2 text-[11px] font-semibold text-neutral-400">favorites</p>
         <p className="rounded-md bg-black/5 px-2 py-1 text-neutral-800">📁 projects</p>
-        <a href="#experience" className="block rounded-md px-2 py-1 hover:bg-black/5">
+        <button onClick={() => goTo("experience")} className="block w-full rounded-md px-2 py-1 text-left hover:bg-black/5">
           🗂 experience
-        </a>
+        </button>
         <a href={profile.resume} target="_blank" rel="noreferrer" className="block rounded-md px-2 py-1 hover:bg-black/5">
           📄 resume.pdf
         </a>
