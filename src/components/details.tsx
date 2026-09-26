@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { entries, profile, projects, type Entry, type Project } from "@/lib/data";
-import { CodeArt, DashboardArt, InternTerminalArt, Media, PhoneArt, Photo, TerminalArt } from "./arts";
+import { CodeArt, DashboardArt, Media, PhoneArt, Photo, TerminalArt } from "./arts";
 import { useDesktop } from "./desktop";
 import { Folder } from "./icons";
 
@@ -77,8 +77,10 @@ export function EntryDetail({ e }: { e: Entry }) {
   return (
     <div>
       {e.id === "reliance" && (
-        <div className="h-64 overflow-hidden border-b border-black/5">
-          <InternTerminalArt big />
+        <div className="aspect-[4/3] overflow-hidden border-b border-black/5">
+          <Media src="/media/reliance-desk.jpg" alt="my desk at reliance: thinkpad, monitor full of express controllers">
+            {null}
+          </Media>
         </div>
       )}
       <div className="space-y-4 p-6">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, type ReactNode } from "react";
-import { motion } from "motion/react";
+import { motion, useInView } from "motion/react";
 import { entries, profile, projects, skills, type Entry } from "@/lib/data";
 import { Photo } from "./arts";
 import { MacWindow, useDesktop } from "./desktop";
@@ -21,23 +21,38 @@ function Chip({ children }: { children: ReactNode }) {
 
 /* ------------------------------ about ------------------------------ */
 
-function FolderTrail({ colors, points, className }: { colors: string[]; points: [number, number][]; className: string }) {
+function FolderTrail({
+  colors,
+  points,
+  className,
+  start = 0,
+}: {
+  colors: string[];
+  points: [number, number][];
+  className: string;
+  start?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  // the whole trail runs once the section is on screen, folder after folder, to the end
+  const inView = useInView(ref, { once: true, amount: 0.25 });
   return (
-    <div className={`pointer-events-none absolute hidden lg:block ${className}`} aria-hidden>
-      {points.map(([x, y], i) => (
-        <motion.div
-          key={i}
-          className="pointer-events-auto absolute h-[70px] w-[96px]"
-          style={{ left: x, top: y, opacity: 0.35 + (i / points.length) * 0.65 }}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 0.35 + (i / points.length) * 0.65, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.04 }}
-          whileHover={{ y: -10 }}
-        >
-          <Folder color={colors[Math.floor((i / points.length) * colors.length)]} className="h-full w-full" />
-        </motion.div>
-      ))}
+    <div ref={ref} className={`pointer-events-none absolute hidden lg:block ${className}`} aria-hidden>
+      {points.map(([x, y], i) => {
+        const end = 0.35 + (i / points.length) * 0.65;
+        return (
+          <motion.div
+            key={i}
+            className="pointer-events-auto absolute h-[70px] w-[96px]"
+            style={{ left: x, top: y }}
+            initial={{ opacity: 0, y: 24, scale: 0.6 }}
+            animate={inView ? { opacity: end, y: 0, scale: 1 } : undefined}
+            transition={{ delay: start + i * 0.09, type: "spring", stiffness: 420, damping: 22 }}
+            whileHover={{ y: -10 }}
+          >
+            <Folder color={colors[Math.floor((i / points.length) * colors.length)]} className="h-full w-full" />
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
@@ -72,44 +87,55 @@ export function About() {
     <section id="about" ref={ref} className="relative overflow-hidden py-24">
       <Chip>the story</Chip>
       <FolderTrail className="left-0 top-24 h-[560px] w-[500px]" points={vTrail} colors={["#dcd6fb", "#c9a8f5", "#e77fe0", "#f5a3b8", "#f38a8a"]} />
-      <FolderTrail className="right-8 top-24 h-[560px] w-[300px]" points={rTrail} colors={["#f0ead0", "#e3d79c", "#cbbd5d"]} />
+      <FolderTrail className="right-8 top-24 h-[560px] w-[300px]" start={0.4} points={rTrail} colors={["#f0ead0", "#e3d79c", "#cbbd5d"]} />
 
       <div className="relative mx-auto mt-10 max-w-[680px] px-4">
         <Draggable id="notes" bounds={ref} trashable={false}>
-          <MacWindow
-            tone="notes"
-            big
-            title="notes"
-            icon={<span className="inline-block h-3.5 w-3.5 rounded-[3px] border border-amber-300 bg-linear-to-b from-amber-200 to-white" />}
-            bodyClassName="px-6 py-7 sm:px-9"
-          >
-            <div className="space-y-5">
-              {lines.map((l, i) => (
-                <motion.p
-                  key={i}
-                  className={para}
-                  initial={{ opacity: 0, y: 8 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ delay: i * 0.12 }}
-                >
-                  {l}
-                </motion.p>
-              ))}
-            </div>
-            <div className="mt-10 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 overflow-hidden rounded-full ring-2 ring-white shadow">
-                  <Photo src={profile.photo} alt={profile.name} caption={false} />
-                </div>
-                <div className="leading-tight">
-                  <p className="text-[17px] text-neutral-900">{profile.handle},</p>
-                  <p className="text-[15px] text-neutral-500">{profile.role}</p>
-                </div>
+          <div className="relative">
+            {/* psyduck perched on the notes window */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/media/_.gif"
+              alt="psyduck, confused as usual"
+              title="psyduck is also confused about css"
+              className="pointer-events-none absolute -top-[104px] right-4 z-10 w-[130px] sm:right-10"
+              draggable={false}
+            />
+            <MacWindow
+              tone="notes"
+              big
+              title="notes"
+              icon={<span className="inline-block h-3.5 w-3.5 rounded-[3px] border border-amber-300 bg-linear-to-b from-amber-200 to-white" />}
+              bodyClassName="px-6 py-7 sm:px-9"
+            >
+              <div className="space-y-5">
+                {lines.map((l, i) => (
+                  <motion.p
+                    key={i}
+                    className={para}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ delay: i * 0.12 }}
+                  >
+                    {l}
+                  </motion.p>
+                ))}
               </div>
-              <span className="-rotate-6 font-hand text-[44px] font-bold leading-none text-neutral-900">atharva</span>
-            </div>
-          </MacWindow>
+              <div className="mt-10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 overflow-hidden rounded-full ring-2 ring-white shadow">
+                    <Photo src={profile.photo} alt={profile.name} caption={false} />
+                  </div>
+                  <div className="leading-tight">
+                    <p className="text-[17px] text-neutral-900">{profile.handle},</p>
+                    <p className="text-[15px] text-neutral-500">{profile.role}</p>
+                  </div>
+                </div>
+                <span className="-rotate-6 font-hand text-[44px] font-bold leading-none text-neutral-900">atharva</span>
+              </div>
+            </MacWindow>
+          </div>
         </Draggable>
       </div>
 

@@ -3,7 +3,7 @@
 import { useRef, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { motion } from "motion/react";
 import { profile } from "@/lib/data";
-import { CodeArt, InternTerminalArt, PhoneArt, Photo, TerminalArt } from "./arts";
+import { CodeArt, Media, PhoneArt, Photo, TerminalArt } from "./arts";
 import { MacWindow, useDesktop } from "./desktop";
 import {
   CodeDetail,
@@ -203,9 +203,11 @@ export default function Hero() {
         <Folder className="h-[56px] w-[70px]" label="projects" />
       </Draggable>
 
-      <FloatWindow id="w-reliance" file="ex-reliance-intern" w={300} h={170} pos={{ left: "4%", top: "64%" }} bounds={ref} delay={0.25} className={lg}
+      <FloatWindow id="w-reliance" file="ex-reliance-intern" w={240} h={180} pos={{ right: "3%", top: "62%" }} bounds={ref} delay={0.25} className={lg}
         onOpen={() => openModal({ title: "ex-reliance-intern", content: <EntryDetail e={entryById("reliance")} />, width: 640 })}>
-        <InternTerminalArt />
+        <Media src="/media/reliance-desk.jpg" alt="my desk at reliance: thinkpad, monitor full of express controllers">
+          {null}
+        </Media>
       </FloatWindow>
 
       <Draggable id="k3" label="(¬_¬)" bounds={ref} style={{ position: "absolute", left: "27%", top: "71%" }} className={lg} delay={0.4}>
@@ -216,7 +218,7 @@ export default function Hero() {
         <Kaomoji start={2} />
       </Draggable>
 
-      <FloatWindow id="w-code" file="events.ts" w={230} h={190} pos={{ right: "3%", top: "62%" }} bounds={ref} delay={0.3} rotate={1} className={lg}
+      <FloatWindow id="w-code" file="events.ts" w={230} h={190} pos={{ left: "4%", top: "64%" }} bounds={ref} delay={0.3} rotate={1} className={lg}
         onOpen={() => openModal({ title: "events.ts", content: <CodeDetail />, width: 560 })}>
         <CodeArt />
       </FloatWindow>
