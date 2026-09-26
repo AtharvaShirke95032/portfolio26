@@ -7,7 +7,7 @@ import { Photo } from "./arts";
 import { MacWindow, useDesktop } from "./desktop";
 import { EntryDetail, Pill, ProjectDetail, projectArt } from "./details";
 import Draggable from "./Draggable";
-import { Folder, GithubIcon, LinkedinIcon, MailSticker, ClassicMac, DocIcon } from "./icons";
+import { Folder, GithubIcon, LinkedinIcon, ClassicMac, DocIcon } from "./icons";
 
 function Chip({ children }: { children: ReactNode }) {
   return (
@@ -118,10 +118,6 @@ export function About() {
       </Draggable>
       <Draggable id="cat" label="cat" bounds={ref} style={{ position: "absolute", left: "24%", top: "18%" }} className="hidden lg:block" rotate={10}>
         <span className="text-6xl">🐈</span>
-      </Draggable>
-      <Draggable id="mail2" label="mail" bounds={ref} style={{ position: "absolute", right: "20%", top: "20%" }} className="hidden lg:block" rotate={-2}
-        onOpen={() => (window.location.href = `mailto:${profile.email}`)}>
-        <MailSticker />
       </Draggable>
       <Draggable id="pc2" label="computer" bounds={ref} style={{ position: "absolute", right: "18%", top: "76%" }} className="hidden lg:block" rotate={4}>
         <ClassicMac className="h-20 w-20" />

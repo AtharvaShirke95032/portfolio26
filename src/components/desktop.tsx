@@ -18,6 +18,7 @@ type ModalSpec = { title: string; content: ReactNode; width?: number; tone?: "de
 type DesktopCtx = {
   nextZ: () => number;
   trashRef: RefObject<HTMLDivElement | null>;
+  deskTrashRef: RefObject<HTMLDivElement | null>;
   trashed: Trashed[];
   trash: (item: Trashed) => void;
   restore: (id: string) => void;
@@ -40,6 +41,7 @@ export function useDesktop() {
 export function DesktopProvider({ children }: { children: ReactNode }) {
   const z = useRef(20);
   const trashRef = useRef<HTMLDivElement | null>(null);
+  const deskTrashRef = useRef<HTMLDivElement | null>(null);
   const [trashed, setTrashed] = useState<Trashed[]>([]);
   const [emptied, setEmptied] = useState<string[]>([]);
   const [modal, setModal] = useState<ModalSpec | null>(null);
@@ -74,6 +76,7 @@ export function DesktopProvider({ children }: { children: ReactNode }) {
       value={{
         nextZ,
         trashRef,
+        deskTrashRef,
         trashed,
         trash,
         restore,

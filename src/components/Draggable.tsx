@@ -39,7 +39,8 @@ export default function Draggable({
   onOpen,
   title,
 }: Props) {
-  const { nextZ, trashRef, trash, isTrashed, setTrashHot } = useDesktop();
+  const { nextZ, trashRef, deskTrashRef, trash, isTrashed, setTrashHot } = useDesktop();
+  const overAnyTrash = (x: number, y: number) => overTrash(trashRef.current, x, y) || overTrash(deskTrashRef.current, x, y);
   const [z, setZ] = useState<number | undefined>(undefined);
   const dragged = useRef(false);
   const gone = isTrashed(id);
@@ -68,12 +69,12 @@ export default function Draggable({
           onDrag={(e) => {
             if (!trashable) return;
             const p = e as PointerEvent;
-            setTrashHot(overTrash(trashRef.current, p.clientX, p.clientY));
+            setTrashHot(overAnyTrash(p.clientX, p.clientY));
           }}
           onDragEnd={(e) => {
             setTrashHot(false);
             const p = e as PointerEvent;
-            if (trashable && overTrash(trashRef.current, p.clientX, p.clientY)) {
+            if (trashable && overAnyTrash(p.clientX, p.clientY)) {
               trash({ id, label: label ?? id });
             }
             setTimeout(() => (dragged.current = false), 0);

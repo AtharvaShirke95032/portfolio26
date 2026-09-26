@@ -164,16 +164,40 @@ export function ProjectsFinder() {
   );
 }
 
+/* stuff that lives in the bin forever */
+const junk = [
+  { icon: "📚", name: "50gb study material", meta: "50 GB · never opened" },
+  { icon: "📄", name: "resume_final_FINAL_v7(2).pdf", meta: "212 KB" },
+  { icon: "📦", name: "node_modules", meta: "1.9 GB · 184,203 items" },
+  { icon: "🛌", name: "sleep schedule", meta: "corrupted" },
+  { icon: "🧪", name: "todo-app-attempt-14", meta: "abandoned at 80%" },
+  { icon: "🐛", name: 'console.log("here")', meta: "x 347" },
+  { icon: "📁", name: "untitled folder (9)", meta: "empty, like the others" },
+  { icon: "🏋️", name: "gym_plan_2025.txt", meta: "last modified jan 2" },
+];
+
 export function TrashView() {
   const { trashed, restore, emptyTrash } = useDesktop();
   return (
     <div className="p-6">
+      <ul className="divide-y divide-black/5">
+        {junk.map((j) => (
+          <li key={j.name} className="flex items-center justify-between gap-3 py-2 text-[14px]">
+            <span className="flex min-w-0 items-center gap-2 text-neutral-700">
+              <span>{j.icon}</span>
+              <span className="truncate">{j.name}</span>
+            </span>
+            <span className="shrink-0 text-[12px] text-neutral-400">{j.meta}</span>
+          </li>
+        ))}
+      </ul>
       {trashed.length === 0 ? (
-        <p className="py-10 text-center text-neutral-400">
-          trash is empty. drag stuff here from the desktop, or hit the red button on any window.
+        <p className="pt-6 text-center text-[13px] text-neutral-400">
+          drag stuff here from the desktop, or hit the red button on any window.
         </p>
       ) : (
         <>
+          <p className="pb-1 pt-5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">you threw away</p>
           <ul className="divide-y divide-black/5">
             {trashed.map((t) => (
               <li key={t.id} className="flex items-center justify-between py-2 text-[14px]">

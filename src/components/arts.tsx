@@ -39,19 +39,22 @@ export function TerminalArt({ big }: { big?: boolean }) {
   );
 }
 
-/* reliance-intern: a white terminal full of intern trivia */
+/* ex-reliance-intern: a white terminal full of (past) intern trivia */
 const internScript = [
   { t: "$ whoami", c: "text-neutral-900" },
-  { t: "atharva · sde intern @ reliance industries", c: "text-neutral-500" },
-  { t: "$ cat internship/fun-facts.txt", c: "text-neutral-900" },
-  { t: "📍 base ............ nagothane, on-site", c: "text-sky-700" },
+  { t: "atharva · ex-sde intern @ reliance industries", c: "text-neutral-500" },
+  { t: "$ cat ~/archive/reliance/fun-facts.txt", c: "text-neutral-900" },
+  { t: "📍 was based in .... nagothane, on-site", c: "text-sky-700" },
+  { t: "🗓 tenure .......... jul → aug 2026", c: "text-sky-700" },
   { t: "☕ chai consumed ... lost count by week 2", c: "text-amber-700" },
-  { t: "📦 modules touched . 7+", c: "text-emerald-700" },
+  { t: "📦 modules shipped . 7+", c: "text-emerald-700" },
   { t: "📋 reqs → features . 10+", c: "text-emerald-700" },
   { t: "🦺 hard hats seen .. more than laptops", c: "text-orange-700" },
   { t: "🧠 learned ......... 'overdue' is a scary word", c: "text-violet-700" },
   { t: "$ git log -1 --oneline", c: "text-neutral-900" },
-  { t: "a1b2c3d feat: survived my first standup ✨", c: "text-rose-600" },
+  { t: "f1n4l3d chore: hand over laptop, say bye 👋", c: "text-rose-600" },
+  { t: "$ exit", c: "text-neutral-900" },
+  { t: "internship complete ✓ (process exited 0)", c: "text-emerald-700" },
 ];
 
 export function InternTerminalArt({ big }: { big?: boolean }) {

@@ -128,7 +128,7 @@ function MusicPill({ open }: { open: boolean }) {
 }
 
 export default function MenuBar() {
-  const [pill, setPill] = useState(true);
+  const [pill, setPill] = useState(false);
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-[950] border-b border-black/[0.07] bg-[#f4f4f3]/80 backdrop-blur-xl">

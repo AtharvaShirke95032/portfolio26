@@ -8,6 +8,7 @@ import { MacWindow, useDesktop } from "./desktop";
 import {
   CodeDetail,
   EntryDetail,
+  TrashView,
   PhotoDetail,
   ProjectDetail,
   ProjectsFinder,
@@ -15,7 +16,7 @@ import {
   projectById,
 } from "./details";
 import Draggable from "./Draggable";
-import { BeachBall, DocIcon, Folder, Kaomoji, MailIcon, MailSticker, NameTag, ClassicMac, PdfFile } from "./icons";
+import { BeachBall, DocIcon, Folder, Kaomoji, MailIcon, ClassicMac, PdfFile } from "./icons";
 
 /** A floating mac window: red = trash it, green = open it big. */
 function FloatWindow({
@@ -53,6 +54,26 @@ function FloatWindow({
       </MacWindow>
       <p className="mt-2 text-center text-[13px] text-neutral-400">{file}</p>
     </Draggable>
+  );
+}
+
+/** The retro recycle bin by the sticky note. Drop things on it, click to peek inside. */
+function DeskTrash({ className, style }: { className?: string; style: CSSProperties }) {
+  const { deskTrashRef, trashed, trashHot, openModal } = useDesktop();
+  return (
+    <div ref={deskTrashRef} className={`group z-10 ${className}`} style={style}>
+      <button
+        aria-label="recycle bin"
+        onClick={() => openModal({ title: "recycle bin", content: <TrashView />, width: 480 })}
+        className={`flex flex-col items-center gap-1 transition-transform ${trashHot ? "scale-115 -rotate-6" : "group-hover:-translate-y-0.5"}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/retro/recycle.png" alt="" className="h-[62px] w-auto [filter:hue-rotate(100deg)_saturate(1.6)]" draggable={false} />
+        <span className="rounded bg-white/70 px-1.5 text-[11px] leading-4 text-neutral-700">
+          recycle bin{trashed.length > 0 && ` (${trashed.length})`}
+        </span>
+      </button>
+    </div>
   );
 }
 
@@ -130,11 +151,16 @@ export default function Hero() {
         <Photo src={profile.photo} alt={profile.name} />
       </FloatWindow>
 
-      <Draggable id="tag-blue" label="name tag" bounds={ref} style={{ position: "absolute", left: "4%", top: "15%" }} className="lg:!left-[23%] lg:!top-[10%]" delay={0.2} rotate={-4}>
-        <NameTag name={profile.handle} />
+      <Draggable id="nerd-cat" label="nerd cat" bounds={ref} style={{ position: "absolute", left: "4%", top: "15%" }} className="lg:!left-[23%] lg:!top-[10%]" delay={0.2} rotate={-4}
+        title="um, actually…">
+        <div className="w-[118px] bg-white p-1.5 pb-5 shadow-[0_8px_18px_-8px_rgba(0,0,0,0.4)] ring-1 ring-black/5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/media/nerd-cat.png" alt="nerd cat" className="aspect-square w-full object-cover" draggable={false} />
+          <p className="mt-1 text-center font-hand text-[15px] leading-none text-neutral-700">um, actually…</p>
+        </div>
       </Draggable>
 
-      <Draggable id="k1" label="^ ω ^" bounds={ref} style={{ position: "absolute", left: "29%", top: "25%" }} className={lg} delay={0.3}>
+      <Draggable id="k1" label="^ ω ^" bounds={ref} style={{ position: "absolute", left: "30%", top: "31%" }} className={lg} delay={0.3}>
         <Kaomoji start={0} />
       </Draggable>
 
@@ -156,30 +182,29 @@ export default function Hero() {
         <PhoneArt />
       </FloatWindow>
 
-      <Draggable id="mail" label="you've got mail" bounds={ref} style={{ position: "absolute", right: "4%", top: "12%" }} className="lg:!right-[28%] lg:!top-[20%]" delay={0.4} rotate={3}
-        onOpen={() => (window.location.href = `mailto:${profile.email}`)} title="email me">
-        <MailSticker />
-      </Draggable>
-
-      <Draggable id="tag-red" label="name tag (red)" bounds={ref} style={{ position: "absolute", right: "5%", top: "40%" }} className={lg} delay={0.45} rotate={-6}>
-        <NameTag name="full-stack" color="#e5262c" />
+      <Draggable id="mc-cat" label="minecraft cat" bounds={ref} style={{ position: "absolute", right: "3%", top: "46%" }} className={lg} delay={0.45} rotate={-3}
+        title="do not disturb">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/media/minecraft-cat.png" alt="minecraft cat lying down" className="w-[190px] drop-shadow-[0_6px_6px_rgba(0,0,0,0.18)]" draggable={false} />
       </Draggable>
 
       <Draggable id="sticky" label="sticky note" bounds={ref} style={{ position: "absolute", left: "3%", top: "44%" }} className={lg} delay={0.55} rotate={-3}>
         <div className="w-[150px] bg-[#fff59d] p-3 font-hand text-[19px] leading-tight text-neutral-800 shadow-[0_8px_16px_-8px_rgba(0,0,0,0.35)]">
-          psst — drag anything into the trash in the dock ↓
+          psst — drag anything into the bin →
           <br />
           (you can put it back)
         </div>
       </Draggable>
+
+      <DeskTrash className={lg} style={{ position: "absolute", left: "calc(3% + 168px)", top: "47%" }} />
 
       <Draggable id="folder-projects" label="projects folder" bounds={ref} style={{ position: "absolute", left: "8%", top: "80%" }} className="lg:!left-[20%] lg:!top-[31%]" delay={0.6}
         onOpen={() => openModal({ title: "projects", content: <ProjectsFinder />, width: 620 })} title="double the fun: click to open">
         <Folder className="h-[56px] w-[70px]" label="projects" />
       </Draggable>
 
-      <FloatWindow id="w-reliance" file="reliance-intern" w={300} h={170} pos={{ left: "4%", top: "64%" }} bounds={ref} delay={0.25} className={lg}
-        onOpen={() => openModal({ title: "reliance-intern", content: <EntryDetail e={entryById("reliance")} />, width: 640 })}>
+      <FloatWindow id="w-reliance" file="ex-reliance-intern" w={300} h={170} pos={{ left: "4%", top: "64%" }} bounds={ref} delay={0.25} className={lg}
+        onOpen={() => openModal({ title: "ex-reliance-intern", content: <EntryDetail e={entryById("reliance")} />, width: 640 })}>
         <InternTerminalArt />
       </FloatWindow>
 
