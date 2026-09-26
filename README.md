@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# atharva's portfolio
 
-## Getting Started
-
-First, run the development server:
+A mac-desktop style portfolio: draggable windows, stickers, a working dock with a trash can, and an iPod music pill.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # http://localhost:3000
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## editing content
+All text lives in `src/lib/data.ts` (profile, projects, experience, skills).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## adding your media
+- **photo**: `public/media/me.jpg` (swap the file to change it)
+- **project screenshots**: `public/media/outly.png` etc., then set `image: "/media/outly.png"` on the project
+- **music**: drop an mp3 at `public/music/track.mp3` (title/cover under `music` in data.ts)
+- **resume**: replace `public/resume.pdf`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Anything left unset keeps its hand-drawn placeholder.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## fun stuff
+- drag anything; drop desktop items on the dock's trash (or hit a window's red light) — put them back from the trash
+- green light / click opens a window big; esc closes
+- click the kaomoji or the cat logo (meow); the headphones icon in the menu bar opens the music player (never autoplays)
+- skills: click an icon to see which project/internship used it (derived from the `stack` lists in data.ts)
