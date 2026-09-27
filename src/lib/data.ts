@@ -169,3 +169,15 @@ export const skills: { group: string; color: string; items: string[] }[] = [
   { group: "databases", color: "#f59e0b", items: ["PostgreSQL", "MongoDB", "Redis", "MySQL", "Supabase"] },
   { group: "tools", color: "#8b5cf6", items: ["Git", "GitHub", "Postman"] },
 ];
+
+/** extra places a skill shows up that aren't in a project/experience `stack` (those are matched automatically) */
+export const skillUses: Record<string, string[]> = {
+  "Node.js": ["outly"],
+  "REST APIs": ["outly"],
+  "React.js": ["this portfolio"],
+  "Next.js": ["this portfolio"],
+  TypeScript: ["this portfolio"],
+  "Tailwind CSS": ["this portfolio"],
+  Git: ["this portfolio"],
+  GitHub: ["this portfolio", "readme-ai"],
+};

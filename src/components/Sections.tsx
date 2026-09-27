@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   AnimatePresence,
   motion,
@@ -12,7 +12,7 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { entries, profile, projects, skills, type Entry } from "@/lib/data";
+import { entries, profile, projects, skillUses, skills, type Entry } from "@/lib/data";
 import { Media, Photo } from "./arts";
 import { MacWindow, useDesktop } from "./desktop";
 import { EntryDetail, Pill, ProjectDetail, projectArt } from "./details";
@@ -308,6 +308,68 @@ const kinds: { key: "all" | Entry["kind"]; label: string; icon: string }[] = [
 
 const kindColor: Record<Entry["kind"], string> = { work: "#7cb6f0", education: "#a3e635", leadership: "#f472b6" };
 
+const verbs = ["shipping", "building", "debugging", "learning", "caffeinated"];
+
+// "where i've been ___" — letters bounce on hover, the last word flips through verbs (click to skip)
+function ExpHeading() {
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (paused) return;
+    const t = setInterval(() => setI((n) => (n + 1) % verbs.length), 2400);
+    return () => clearInterval(t);
+  }, [paused]);
+  const v = verbs[i];
+
+  return (
+    <h2 className="mx-auto mt-6 max-w-xl select-none px-4 text-center text-[clamp(32px,4.5vw,56px)] font-semibold leading-[1.05] tracking-[-0.04em]">
+      <span className="sr-only">where i&apos;ve been</span>
+      <span className="inline-block" aria-hidden>
+        {Array.from("where i've been").map((ch, k) =>
+          ch === " " ? (
+            <span key={k}> </span>
+          ) : (
+            <motion.span
+              key={k}
+              className="inline-block cursor-default"
+              whileHover={reduce ? undefined : { y: -10, rotate: k % 2 ? 8 : -8, color: "var(--accent)" }}
+              transition={{ type: "spring", stiffness: 500, damping: 12 }}
+            >
+              {ch}
+            </motion.span>
+          ),
+        )}
+      </span>
+      <button
+        type="button"
+        onClick={() => setI((n) => (n + 1) % verbs.length)}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        title="click me"
+        className="mx-auto mt-1 block cursor-pointer"
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span key={v} className="inline-block text-neutral-400 [perspective:600px]">
+            {Array.from(v).map((ch, k) => (
+              <motion.span
+                key={k}
+                className="inline-block origin-bottom"
+                initial={{ rotateX: -90, opacity: 0, y: 8 }}
+                animate={{ rotateX: 0, opacity: 1, y: 0 }}
+                exit={{ rotateX: 90, opacity: 0, y: -8, transition: { duration: 0.15, delay: k * 0.015 } }}
+                transition={{ type: "spring", stiffness: 420, damping: 22, delay: k * 0.035 }}
+              >
+                {ch}
+              </motion.span>
+            ))}
+          </motion.span>
+        </AnimatePresence>
+      </button>
+    </h2>
+  );
+}
+
 function ExpPreview({ e, onOpen }: { e: Entry; onOpen: () => void }) {
   return (
     <motion.div
@@ -383,9 +445,7 @@ export function Experience() {
   return (
     <section id="experience" ref={ref} className="relative overflow-hidden py-24">
       <Chip>experience</Chip>
-      <h2 className="mx-auto mt-6 max-w-xl px-4 text-center text-[clamp(32px,4.5vw,56px)] font-semibold leading-[1.05] tracking-[-0.04em]">
-        where i&apos;ve been <span className="text-neutral-400">shipping</span>
-      </h2>
+      <ExpHeading />
 
       {/* desk clutter — all draggable, big screens only */}
       <div className="pointer-events-none absolute inset-0 z-10 hidden xl:block">
@@ -542,9 +602,22 @@ function seeded(seed: number) {
   };
 }
 
+// "Express.js" and "Express" are the same thing
+const norm = (s: string) => s.toLowerCase().replace(/\.js$|[^a-z0-9+]/g, "");
+
+function usedIn(skill: string): string[] {
+  const k = norm(skill);
+  const fromProjects = projects.filter((p) => p.stack.some((t) => norm(t) === k)).map((p) => (p.id === "reliance" ? "reliance internship" : p.name));
+  const fromEntries = entries
+    .filter((e) => !projects.some((p) => p.id === e.id) && e.stack?.some((t) => norm(t) === k))
+    .map((e) => e.org);
+  return [...new Set([...fromProjects, ...fromEntries, ...(skillUses[skill] ?? [])])];
+}
+
 export function Skills() {
   const board = useRef<HTMLDivElement>(null);
   const [seed, setSeed] = useState(7);
+  const [picked, setPicked] = useState<string | null>(null);
   const chips = useMemo(() => {
     const rnd = seeded(seed);
     const all = skills.flatMap((g) => g.items.map((name) => ({ name, color: g.color })));
@@ -581,6 +654,12 @@ export function Skills() {
             </button>
           </div>
           <div ref={board} className="dots relative h-[520px] overflow-hidden bg-[#fafafa] sm:h-[420px]">
+            {/* the janitor, mopping up the corner (sits under the chips so it never blocks one) */}
+            <div className="pointer-events-none absolute bottom-0 right-4 w-[92px] sm:w-[110px]" aria-hidden>
+              <span className="absolute -bottom-1 left-2 right-0 h-3 rounded-[50%] bg-sky-200/40 blur-[3px]" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/mop-fish.webp" alt="" className="relative w-full" draggable={false} />
+            </div>
             {chips.map((c, i) => (
               <Draggable
                 key={`${seed}-${c.name}`}
@@ -590,16 +669,53 @@ export function Skills() {
                 rotate={c.rot}
                 delay={i * 0.025}
                 style={{ position: "absolute", left: `${c.left}%`, top: `${c.top}%` }}
+                onOpen={() => setPicked((p) => (p === c.name ? null : c.name))}
               >
                 <span
-                  className="flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-3.5 py-1.5 text-[14px] font-medium text-neutral-800 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.25)] sm:text-[15px]"
-                  style={{ boxShadow: `0 0 0 1.5px ${c.color}, 0 6px 14px -6px ${c.color}` }}
+                  className={`flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[14px] font-medium ring-1 transition-colors sm:text-[15px] ${
+                    picked === c.name
+                      ? "bg-neutral-900 text-white ring-neutral-900 shadow-[0_8px_18px_-8px_rgba(0,0,0,0.5)]"
+                      : "bg-white text-neutral-800 ring-black/10 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_4px_10px_-6px_rgba(0,0,0,0.25)] hover:ring-black/20"
+                  }`}
                 >
                   <span className="h-2 w-2 rounded-full" style={{ background: c.color }} />
                   {c.name}
                 </span>
               </Draggable>
             ))}
+          </div>
+          {/* status bar: where the picked skill has been used */}
+          <div className="flex min-h-10 items-center gap-2 border-t border-black/5 bg-[#f6f6f6]/80 px-4 py-2 text-[13px]">
+            <AnimatePresence mode="wait" initial={false}>
+              {picked ? (
+                <motion.p
+                  key={picked}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18 }}
+                  className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 text-neutral-500"
+                >
+                  <span className="font-medium text-neutral-900">{picked}</span>
+                  {usedIn(picked).length ? (
+                    <>
+                      <span>— used in</span>
+                      {usedIn(picked).map((u) => (
+                        <span key={u} className="rounded-full bg-white px-2 py-0.5 text-[12px] text-neutral-700 ring-1 ring-black/10">
+                          {u}
+                        </span>
+                      ))}
+                    </>
+                  ) : (
+                    <span>— in the toolbox, no featured project with it yet. ask me about it!</span>
+                  )}
+                </motion.p>
+              ) : (
+                <motion.p key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-neutral-400">
+                  click a skill to see where i&apos;ve used it · drag to rearrange
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
         </MacWindow>
         <p className="mt-4 text-center text-[14px] text-neutral-400">also speaks: english · hindi · marathi</p>
