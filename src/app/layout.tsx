@@ -31,17 +31,14 @@ export const metadata: Metadata = {
   },
 };
 
-// browser chrome (mobile address bar etc.) matches the page in both themes
+// browser chrome (mobile address bar etc.) — light by default; the theme toggle swaps it
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f4f3" },
-    { media: "(prefers-color-scheme: dark)", color: "#121214" },
-  ],
+  themeColor: "#f4f4f3",
 };
 
-// runs before first paint so a dark-mode visitor never sees a white flash.
-// saved choice wins; otherwise follow the os setting.
-const themeScript = `try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t}catch(e){}`;
+// runs before first paint so someone who picked dark never sees a white flash.
+// light for everyone by default (ignores the os setting); a saved choice from the toggle wins.
+const themeScript = `try{var t=localStorage.getItem("theme")==="dark"?"dark":"light";document.documentElement.dataset.theme=t;if(t==="dark")addEventListener("DOMContentLoaded",function(){var m=document.querySelector('meta[name="theme-color"]');if(m)m.content="#121214"})}catch(e){}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

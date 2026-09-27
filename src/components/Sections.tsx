@@ -744,7 +744,8 @@ export function Skills() {
                 </motion.p>
               ) : (
                 <motion.p key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-neutral-400">
-                  click a skill to see where i&apos;ve used it · drag to rearrange
+                  <span className="lg:hidden">tap a skill to see where i&apos;ve used it</span>
+                  <span className="hidden lg:inline">click a skill to see where i&apos;ve used it · drag to rearrange</span>
                 </motion.p>
               )}
             </AnimatePresence>
@@ -884,7 +885,7 @@ export function Contact() {
             <p className="flex-1 pb-2 font-hand text-[22px] leading-tight text-neutral-500">
               based in {profile.location.split(",")[0]} — happy to relocate or go remote.
             </p>
-            <Draggable id="facetime-cat" bounds={ref} trashable={false} rotate={2.5} delay={0.2} className="w-[180px] shrink-0 sm:w-[230px]">
+            <Draggable id="facetime-cat" touchDrag bounds={ref} trashable={false} rotate={2.5} delay={0.2} className="w-[180px] shrink-0 sm:w-[230px]">
               <MacWindow title="facetime" bodyClassName="bg-white">
                 {/* only the video stays light (hides the gif's white edges); the caption follows the theme */}
                 <div className="light-island relative bg-white">

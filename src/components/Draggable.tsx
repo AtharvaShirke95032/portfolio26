@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useDesktop } from "./desktop";
 
@@ -17,6 +17,8 @@ type Props = {
   trashable?: boolean;
   /** fired on a click that wasn't a drag */
   onOpen?: () => void;
+  /** stay draggable on phones/tablets too (everything else is tap-only there) */
+  touchDrag?: boolean;
   title?: string;
 };
 
@@ -25,6 +27,16 @@ function overTrash(el: HTMLElement | null, x: number, y: number) {
   const r = el.getBoundingClientRect();
   return x > r.left - 20 && x < r.right + 20 && y > r.top - 20 && y < r.bottom + 20;
 }
+
+// phones/tablets: dragging would hijack the swipe meant to scroll the page,
+// so things there are tap-only
+const TOUCH_QUERY = "(max-width: 1023px), (pointer: coarse)";
+const subscribeTouch = (cb: () => void) => {
+  const m = matchMedia(TOUCH_QUERY);
+  m.addEventListener("change", cb);
+  return () => m.removeEventListener("change", cb);
+};
+export const useTapOnly = () => useSyncExternalStore(subscribeTouch, () => matchMedia(TOUCH_QUERY).matches, () => false);
 
 export default function Draggable({
   id,
@@ -38,12 +50,14 @@ export default function Draggable({
   trashable = true,
   onOpen,
   title,
+  touchDrag = false,
 }: Props) {
   const { nextZ, trashRef, deskTrashRef, trash, isTrashed, setTrashHot } = useDesktop();
   const overAnyTrash = (x: number, y: number) => overTrash(trashRef.current, x, y) || overTrash(deskTrashRef.current, x, y);
   const [z, setZ] = useState<number | undefined>(undefined);
   const dragged = useRef(false);
   const gone = isTrashed(id);
+  const tapOnly = useTapOnly() && !touchDrag;
 
   return (
     <AnimatePresence>
@@ -51,9 +65,11 @@ export default function Draggable({
         <motion.div
           key={id}
           title={title}
-          className={`touch-none select-none ${onOpen ? "cursor-pointer" : "cursor-grab"} active:cursor-grabbing ${className}`}
+          className={`select-none ${
+            tapOnly ? (onOpen ? "cursor-pointer" : "") : `touch-none active:cursor-grabbing ${onOpen ? "cursor-pointer" : "cursor-grab"}`
+          } ${className}`}
           style={{ ...style, zIndex: z ?? style?.zIndex }}
-          drag
+          drag={!tapOnly}
           dragConstraints={bounds}
           dragElastic={0.15}
           dragTransition={{ power: 0.15, timeConstant: 180 }}

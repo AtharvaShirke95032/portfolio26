@@ -47,6 +47,7 @@ function flipTheme(dark: boolean) {
   // animate colours only for the switch itself, not on every hover
   root.classList.add("theme-switching");
   root.dataset.theme = next;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "dark" ? "#121214" : "#f4f4f3");
   try {
     localStorage.setItem("theme", next);
   } catch {}
