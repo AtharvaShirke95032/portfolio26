@@ -189,7 +189,7 @@ export default function Hero() {
       </Draggable>
 
       <Draggable id="sticky" label="sticky note" bounds={ref} style={{ position: "absolute", left: "3%", top: "44%" }} className={lg} delay={0.55} rotate={-3}>
-        <div className="w-[150px] bg-[#fff59d] p-3 font-hand text-[19px] leading-tight text-neutral-800 shadow-[0_8px_16px_-8px_rgba(0,0,0,0.35)]">
+        <div className="light-island w-[150px] bg-[#fff59d] p-3 font-hand text-[19px] leading-tight text-neutral-800 shadow-[0_8px_16px_-8px_rgba(0,0,0,0.35)]">
           psst — drag anything into the bin →
           <br />
           (you can put it back)

@@ -25,12 +25,70 @@ function Logo() {
       <motion.img
         src="/media/logo-cat.png"
         alt=""
-        className="h-9 w-auto select-none"
+        className="dark-invert h-9 w-auto select-none"
         draggable={false}
         whileHover={{ rotate: [0, -10, 8, -4, 0], scale: 1.08, transition: { duration: 0.6 } }}
         whileTap={{ scale: 0.92 }}
       />
     </a>
+  );
+}
+
+const subscribeTheme = (cb: () => void) => {
+  const o = new MutationObserver(cb);
+  o.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => o.disconnect();
+};
+const themeNow = () => document.documentElement.dataset.theme ?? "light";
+
+function ThemeToggle() {
+  const theme = useSyncExternalStore(subscribeTheme, themeNow, () => "light");
+  const dark = theme === "dark";
+  const flip = () => {
+    const root = document.documentElement;
+    const next = dark ? "light" : "dark";
+    // animate colours only for the switch itself, not on every hover
+    root.classList.add("theme-switching");
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem("theme", next);
+    } catch {}
+    setTimeout(() => root.classList.remove("theme-switching"), 400);
+  };
+  return (
+    <button
+      onClick={flip}
+      aria-label={dark ? "switch to light theme" : "switch to dark theme"}
+      title={dark ? "light mode" : "dark mode"}
+      className="relative flex h-[18px] w-[18px] items-center justify-center transition-colors hover:text-neutral-900"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.svg
+          key={theme}
+          viewBox="0 0 24 24"
+          className="h-[18px] w-[18px]"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={{ rotate: -90, scale: 0.4, opacity: 0 }}
+          animate={{ rotate: 0, scale: 1, opacity: 1 }}
+          exit={{ rotate: 90, scale: 0.4, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          aria-hidden
+        >
+          {dark ? (
+            <>
+              <circle cx="12" cy="12" r="4.2" />
+              <path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" />
+            </>
+          ) : (
+            <path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7Z" />
+          )}
+        </motion.svg>
+      </AnimatePresence>
+    </button>
   );
 }
 
@@ -165,6 +223,7 @@ export default function MenuBar() {
             >
               <HeadphonesIcon className="h-[18px] w-[18px]" />
             </button>
+            <ThemeToggle />
             <BluetoothIcon className="hidden h-[16px] w-[16px] md:block" />
             <BatteryIcon className="hidden h-[16px] w-[28px] md:block" />
             <span className="hidden text-neutral-400 sm:inline">

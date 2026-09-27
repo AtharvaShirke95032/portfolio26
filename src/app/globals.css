@@ -118,3 +118,109 @@ body {
   }
 }
 
+
+/* ------------------------------------------------------------------ */
+/* dark theme                                                          */
+/* set by <html data-theme="dark">. components are written light-first */
+/* with tailwind neutrals, so dark mode remaps those utilities here.    */
+/* anything wrapped in .light-island (sticky notes, polaroids) is left  */
+/* alone so paper stays paper.                                          */
+/* ------------------------------------------------------------------ */
+
+:root[data-theme="dark"] {
+  --background: #121214;
+  --foreground: #ededed;
+  --muted: #8a8a8a;
+  --dot: #2b2b30;
+  --accent: #4b8ff8;
+  --surface: #1c1c1f;
+  --surface-2: #232327;
+  --surface-3: #2c2c31;
+  color-scheme: dark;
+}
+
+/* smooth the switch, but only while toggling (class added by the toggle) */
+:root.theme-switching,
+:root.theme-switching * {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease !important;
+}
+
+[data-theme="dark"] {
+  /* text */
+  & :is(.text-neutral-950, .text-neutral-900):not(:where(.light-island, .light-island *)) { color: #f2f2f2; }
+  & .text-neutral-800:not(:where(.light-island, .light-island *)) { color: #e6e6e6; }
+  & .text-neutral-700:not(:where(.light-island, .light-island *)) { color: #d2d2d2; }
+  & .text-neutral-600:not(:where(.light-island, .light-island *)) { color: #b4b4b4; }
+  & .text-neutral-500:not(:where(.light-island, .light-island *)) { color: #9a9a9a; }
+  & .text-neutral-400:not(:where(.light-island, .light-island *)) { color: #7d7d82; }
+  & .text-neutral-300:not(:where(.light-island, .light-island *)) { color: #55555a; }
+  & .hover\:text-neutral-900:hover:not(:where(.light-island, .light-island *)) { color: #f2f2f2; }
+  & .hover\:text-neutral-700:hover:not(:where(.light-island, .light-island *)) { color: #d2d2d2; }
+  & .placeholder\:text-neutral-400::placeholder { color: #6b6b70; }
+
+  /* surfaces */
+  & .bg-white:not(:where(.light-island, .light-island *)) { background-color: var(--surface); }
+  & :is(.bg-white\/95, .bg-white\/90, .bg-white\/85):not(:where(.light-island, .light-island *)) { background-color: rgb(28 28 31 / 0.88); }
+  & :is(.bg-white\/70, .bg-white\/60):not(:where(.light-island, .light-island *)) { background-color: rgb(40 40 45 / 0.6); }
+  & .bg-white\/45 { background-color: rgb(40 40 45 / 0.5); }
+  & .border-white\/60 { border-color: rgb(255 255 255 / 0.1); }
+  & :is(.bg-neutral-50, .bg-neutral-50\/70, .bg-neutral-50\/80):not(:where(.light-island, .light-island *)) { background-color: var(--surface-2); }
+  & .bg-neutral-100:not(:where(.light-island, .light-island *)) { background-color: var(--surface-3); }
+  & .hover\:bg-neutral-100:hover { background-color: var(--surface-3); }
+  & .bg-neutral-200 { background-color: #34343a; }
+  & .bg-neutral-300 { background-color: #45454b; }
+  & .from-neutral-50 { --tw-gradient-from: var(--surface-2); }
+  & .to-neutral-100 { --tw-gradient-to: var(--surface-3); }
+  & .bg-\[\#f6f6f6\]\/80 { background-color: rgb(35 35 39 / 0.85); }
+  & .bg-\[\#fafafa\] { background-color: #17171a; }
+  & .bg-\[\#f4f4f3\]\/80 { background-color: rgb(18 18 20 / 0.8); }
+
+  /* dark fills flip to light so "selected" still pops */
+  & .bg-neutral-900 { background-color: #f2f2f2; }
+  & .bg-neutral-900.text-white { color: #111; }
+  & .ring-neutral-900 { --tw-ring-color: #f2f2f2; }
+
+  /* hairlines + tints: black-on-light becomes white-on-dark */
+  & .border-black\/5 { border-color: rgb(255 255 255 / 0.07); }
+  & :is(.border-black\/10, .border-black\/\[0\.07\]) { border-color: rgb(255 255 255 / 0.1); }
+  & .border-neutral-400:not(:where(.light-island, .light-island *)) { border-color: #4a4a50; }
+  & .border-neutral-300 { border-color: #3d3d43; }
+  & .ring-black\/5 { --tw-ring-color: rgb(255 255 255 / 0.06); }
+  & :is(.ring-black\/10, .ring-black\/\[0\.08\]) { --tw-ring-color: rgb(255 255 255 / 0.1); }
+  & :is(.ring-black\/20, .hover\:ring-black\/20:hover) { --tw-ring-color: rgb(255 255 255 / 0.2); }
+  & :is(.bg-black\/5, .hover\:bg-black\/5:hover) { background-color: rgb(255 255 255 / 0.06); }
+  & .bg-black\/\[0\.07\] { background-color: rgb(255 255 255 / 0.09); }
+  & .hover\:bg-black\/\[0\.04\]:hover { background-color: rgb(255 255 255 / 0.05); }
+  & .bg-black\/15 { background-color: rgb(255 255 255 / 0.15); }
+
+  /* mac chrome */
+  & .win-bar {
+    background-image: linear-gradient(180deg, #38383c, #2c2c30);
+    border-color: rgb(0 0 0 / 0.5);
+  }
+  & .win-bar-notes {
+    background-image: linear-gradient(180deg, #3b3629, #312d23);
+    border-color: rgb(0 0 0 / 0.5);
+  }
+  & .window-shadow {
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.09),
+      0 16px 36px -12px rgb(0 0 0 / 0.7),
+      0 2px 6px rgb(0 0 0 / 0.3);
+  }
+  & .glossy-white {
+    background: linear-gradient(180deg, #3a3a3f 0%, #2e2e33 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 0 0 1px rgb(255 255 255 / 0.12),
+      0 8px 20px -8px rgb(0 0 0 / 0.6);
+    color: #eee;
+  }
+  & .dark-invert { filter: invert(1); }
+
+  /* highlighter marks in the about notes */
+  & .bg-\[\#fdf3b8\] { background-color: rgb(250 204 21 / 0.2); color: #fde68a; }
+}

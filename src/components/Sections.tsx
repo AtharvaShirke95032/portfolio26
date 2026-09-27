@@ -450,7 +450,7 @@ export function Experience() {
       {/* desk clutter — all draggable, big screens only */}
       <div className="pointer-events-none absolute inset-0 z-10 hidden xl:block">
         <Draggable id="exp-polaroid" bounds={ref} trashable={false} rotate={-5} delay={0.2} className="pointer-events-auto absolute left-[3%] top-24">
-          <div className="w-[190px] bg-white p-2.5 pb-3 shadow-[0_12px_24px_-10px_rgba(0,0,0,0.35)]">
+          <div className="light-island w-[190px] bg-white p-2.5 pb-3 shadow-[0_12px_24px_-10px_rgba(0,0,0,0.35)]">
             <div className="aspect-square overflow-hidden">
               <Media src="/media/reliance-desk.jpg" alt="my desk at reliance">
                 {null}
@@ -462,7 +462,7 @@ export function Experience() {
         </Draggable>
 
         <Draggable id="exp-sticky" bounds={ref} trashable={false} rotate={5} delay={0.35} className="pointer-events-auto absolute right-[3%] top-40">
-          <div className="w-[170px] bg-[#c7f0d8] p-3.5 font-hand text-[20px] leading-tight text-neutral-800 shadow-[0_8px_16px_-8px_rgba(0,0,0,0.35)]">
+          <div className="light-island w-[170px] bg-[#c7f0d8] p-3.5 font-hand text-[20px] leading-tight text-neutral-800 shadow-[0_8px_16px_-8px_rgba(0,0,0,0.35)]">
             next up:
             <br />
             <span className="line-through decoration-2 opacity-50">intern @ reliance</span>
@@ -867,7 +867,7 @@ export function Contact() {
               based in {profile.location.split(",")[0]} — happy to relocate or go remote.
             </p>
             <Draggable id="facetime-cat" bounds={ref} trashable={false} rotate={2.5} delay={0.2} className="w-[230px] shrink-0">
-              <MacWindow title="facetime" bodyClassName="bg-white">
+              <MacWindow title="facetime" bodyClassName="light-island bg-white">
                 <div className="relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/cat-eat.webp" alt="a cat eating, staring into the camera" className="aspect-square w-full object-cover" draggable={false} />

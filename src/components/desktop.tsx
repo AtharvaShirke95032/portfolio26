@@ -183,10 +183,10 @@ export function MacWindow({
 }) {
   const bar =
     tone === "notes"
-      ? "bg-linear-to-b from-[#f3edd5] to-[#e9e1c3] border-b border-black/10"
+      ? "win-bar-notes bg-linear-to-b from-[#f3edd5] to-[#e9e1c3] border-b border-black/10"
       : tone === "dark"
         ? "bg-[#2a2a2c] border-b border-black/60 text-neutral-400"
-        : "bg-linear-to-b from-[#f6f6f6] to-[#e8e8e8] border-b border-black/10";
+        : "win-bar bg-linear-to-b from-[#f6f6f6] to-[#e8e8e8] border-b border-black/10";
   return (
     <div
       className={`window-shadow overflow-hidden rounded-xl ${tone === "dark" ? "bg-[#1c1c1e]" : "bg-white"} ${className}`}
