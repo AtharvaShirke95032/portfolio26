@@ -1,7 +1,16 @@
 "use client";
 
 import { useMemo, useRef, useState, type ReactNode } from "react";
-import { motion, useInView } from "motion/react";
+import {
+  motion,
+  useAnimationFrame,
+  useInView,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useTransform,
+  type MotionValue,
+} from "motion/react";
 import { entries, profile, projects, skills, type Entry } from "@/lib/data";
 import { Photo } from "./arts";
 import { MacWindow, useDesktop } from "./desktop";
@@ -21,47 +30,126 @@ function Chip({ children }: { children: ReactNode }) {
 
 /* ------------------------------ about ------------------------------ */
 
+type Pt = [number, number];
+
+// walks a polyline by arc length: t in [0,1] -> point on the path
+function pathSampler(path: Pt[]) {
+  const segs = path.slice(1).map((p, i) => Math.hypot(p[0] - path[i][0], p[1] - path[i][1]));
+  const total = segs.reduce((a, b) => a + b, 0);
+  return (t: number): Pt => {
+    let d = t * total;
+    for (let i = 0; i < segs.length; i++) {
+      if (d <= segs[i] || i === segs.length - 1) {
+        const k = segs[i] ? Math.min(d / segs[i], 1) : 0;
+        const [a, b] = [path[i], path[i + 1]];
+        return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+      }
+      d -= segs[i];
+    }
+    return path[path.length - 1];
+  };
+}
+
+// blends the palette smoothly along the path so colours flow with the folders
+function colorAt(colors: string[], t: number) {
+  const rgb = (h: string) => [1, 3, 5].map((o) => parseInt(h.slice(o, o + 2), 16));
+  const f = t * (colors.length - 1);
+  const i = Math.min(Math.floor(f), colors.length - 2);
+  const [a, b] = [rgb(colors[i]), rgb(colors[i + 1])];
+  return "#" + a.map((v, j) => Math.round(v + (b[j] - v) * (f - i)).toString(16).padStart(2, "0")).join("");
+}
+
+function TrailFolder({
+  i,
+  count,
+  flow,
+  at,
+  colors,
+  delay,
+  show,
+  onHover,
+}: {
+  i: number;
+  count: number;
+  flow: MotionValue<number>;
+  at: (t: number) => Pt;
+  colors: string[];
+  delay: number;
+  show: boolean;
+  onHover: (h: boolean) => void;
+}) {
+  const t = useTransform(flow, (f) => (f + i / count) % 1);
+  const x = useTransform(t, (v) => at(v)[0]);
+  const y = useTransform(t, (v) => at(v)[1]);
+  // brighter toward the end of the trail, fading in/out at the ends so the loop has no seam
+  const opacity = useTransform(t, (v) => (0.35 + v * 0.65) * Math.min(1, v / 0.07, (1 - v) / 0.07));
+  // stepped so the folder only re-renders a few times per lap, not every frame
+  const color = useTransform(t, (v) => colorAt(colors, Math.round(v * 24) / 24));
+  const [fill, setFill] = useState(() => color.get());
+  useMotionValueEvent(color, "change", setFill);
+
+  return (
+    <motion.div className="absolute left-0 top-0 h-[70px] w-[96px]" style={{ x, y, opacity }}>
+      <motion.div
+        className="pointer-events-auto h-full w-full"
+        initial={{ opacity: 0, y: 24, scale: 0.6 }}
+        animate={show ? { opacity: 1, y: 0, scale: 1 } : undefined}
+        transition={{ delay: delay + i * 0.06, type: "spring", stiffness: 420, damping: 22 }}
+        whileHover={{ y: -12, scale: 1.12, rotate: -4 }}
+        onHoverStart={() => onHover(true)}
+        onHoverEnd={() => onHover(false)}
+      >
+        <Folder color={fill} className="h-full w-full" />
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function FolderTrail({
   colors,
-  points,
+  path,
+  count,
   className,
   start = 0,
+  duration = 22,
 }: {
   colors: string[];
-  points: [number, number][];
+  path: Pt[];
+  count: number;
   className: string;
   start?: number;
+  duration?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  // the whole trail runs once the section is on screen, folder after folder, to the end
-  const inView = useInView(ref, { once: true, amount: 0.25 });
+  const inView = useInView(ref, { amount: 0.25 });
+  const [shown, setShown] = useState(false);
+  if (inView && !shown) setShown(true);
+  const reduce = useReducedMotion();
+  const at = useMemo(() => pathSampler(path), [path]);
+
+  // the folders ride the path like a conveyor, left to right; hovering one slows the whole trail
+  const flow = useMotionValue(0);
+  const speed = useRef(1);
+  const target = useRef(1);
+  useAnimationFrame((_, dt) => {
+    if (reduce || !inView) return;
+    speed.current += (target.current - speed.current) * Math.min(1, dt / 250);
+    flow.set((flow.get() + (dt / 1000 / duration) * speed.current) % 1);
+  });
+  const onHover = (h: boolean) => (target.current = h ? 0.12 : 1);
+
   return (
     <div ref={ref} className={`pointer-events-none absolute hidden lg:block ${className}`} aria-hidden>
-      {points.map(([x, y], i) => {
-        const end = 0.35 + (i / points.length) * 0.65;
-        return (
-          <motion.div
-            key={i}
-            className="pointer-events-auto absolute h-[70px] w-[96px]"
-            style={{ left: x, top: y }}
-            initial={{ opacity: 0, y: 24, scale: 0.6 }}
-            animate={inView ? { opacity: end, y: 0, scale: 1 } : undefined}
-            transition={{ delay: start + i * 0.09, type: "spring", stiffness: 420, damping: 22 }}
-            whileHover={{ y: -10 }}
-          >
-            <Folder color={colors[Math.floor((i / points.length) * colors.length)]} className="h-full w-full" />
-          </motion.div>
-        );
-      })}
+      {Array.from({ length: count }, (_, i) => (
+        <TrailFolder key={i} i={i} count={count} flow={flow} at={at} colors={colors} delay={start} show={shown} onHover={onHover} />
+      ))}
     </div>
   );
 }
 
-const vTrail: [number, number][] = [
-  ...Array.from({ length: 9 }, (_, i) => [i * 14, i * 44] as [number, number]),
-  ...Array.from({ length: 11 }, (_, i) => [130 + i * 30, 350 - i * 36] as [number, number]),
-];
-const rTrail: [number, number][] = Array.from({ length: 12 }, (_, i) => [180 - i * 16 + (i > 6 ? (i - 6) * 10 : 0), 60 + i * 38] as [number, number]);
+// same "V" on both sides: down the left arm, back up the right, then loop
+const vPath: Pt[] = [[0, 0], [121, 370], [430, -10]];
+const rPath: Pt[] = [[0, 0], [90, 370], [330, -10]];
 
 export function About() {
   const ref = useRef<HTMLElement>(null);
@@ -86,8 +174,8 @@ export function About() {
   return (
     <section id="about" ref={ref} className="relative overflow-hidden py-24">
       <Chip>the story</Chip>
-      <FolderTrail className="left-0 top-24 h-[560px] w-[500px]" points={vTrail} colors={["#dcd6fb", "#c9a8f5", "#e77fe0", "#f5a3b8", "#f38a8a"]} />
-      <FolderTrail className="right-8 top-24 h-[560px] w-[300px]" start={0.4} points={rTrail} colors={["#f0ead0", "#e3d79c", "#cbbd5d"]} />
+      <FolderTrail className="left-0 top-24 h-[560px] w-[530px]" path={vPath} count={22} colors={["#dcd6fb", "#c9a8f5", "#e77fe0", "#f5a3b8", "#f38a8a"]} />
+      <FolderTrail className="right-4 top-24 h-[560px] w-[430px]" start={0.4} path={rPath} count={18} duration={19} colors={["#f0ead0", "#e3d79c", "#cbbd5d", "#a3b85a"]} />
 
       <div className="relative mx-auto mt-10 max-w-[680px] px-4">
         <Draggable id="notes" bounds={ref} trashable={false}>
