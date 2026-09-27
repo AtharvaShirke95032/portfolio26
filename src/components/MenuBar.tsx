@@ -19,26 +19,17 @@ function Clock() {
 }
 
 function Logo() {
-  const [happy, setHappy] = useState(false);
   return (
-    <a
-      href="#top"
-      aria-label="back to top"
-      className="absolute left-1/2 -translate-x-1/2"
-      onMouseEnter={() => setHappy(true)}
-      onMouseLeave={() => setHappy(false)}
-    >
-      <svg viewBox="0 0 64 36" className="h-8 w-14 text-neutral-900" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <motion.path
-          animate={{ d: happy ? "M6 10 L12 4 L18 10" : "M6 8 L18 8" }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-        />
-        <path d="M18 8 L34 30 L52 30" />
-        <motion.path
-          animate={{ d: happy ? "M44 10 L50 4 L56 10" : "M40 8 L58 8" }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-        />
-      </svg>
+    <a href="#top" aria-label="back to top" className="absolute left-1/2 -translate-x-1/2">
+      {/* curled-up cat — wiggles hello on hover */}
+      <motion.img
+        src="/media/logo-cat.png"
+        alt=""
+        className="h-9 w-auto select-none"
+        draggable={false}
+        whileHover={{ rotate: [0, -10, 8, -4, 0], scale: 1.08, transition: { duration: 0.6 } }}
+        whileTap={{ scale: 0.92 }}
+      />
     </a>
   );
 }
