@@ -783,7 +783,7 @@ export function Contact() {
   const field = "w-full bg-transparent py-3 text-[15px] text-neutral-900 outline-none placeholder:text-neutral-400";
 
   return (
-    <section id="contact" ref={ref} className="dots relative pb-40 pt-24">
+    <section id="contact" ref={ref} className="dots relative pb-[calc(2rem+env(safe-area-inset-bottom))] pt-24 md:pb-40">
       <Chip>contact</Chip>
       <h2 className="mx-auto mt-6 max-w-xl px-4 text-center text-[clamp(32px,4.5vw,56px)] font-semibold leading-[1.05] tracking-[-0.04em]">
         say hi <span className="text-neutral-400">— i reply fast</span>
@@ -905,7 +905,7 @@ export function Contact() {
           </div>
         </div>
       </div>
-      <footer className="mt-24 px-4 text-center text-[13px] text-neutral-400">
+      <footer className="mt-16 px-4 text-center text-[13px] text-neutral-400 md:mt-24">
         made with ☕ and way too many tabs · © {new Date().getFullYear()} {profile.name}
       </footer>
     </section>
