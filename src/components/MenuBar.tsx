@@ -47,6 +47,7 @@ function MusicPill({ open }: { open: boolean }) {
   const audio = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [missing, setMissing] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const toggle = async () => {
     const a = audio.current;
@@ -76,37 +77,43 @@ function MusicPill({ open }: { open: boolean }) {
           exit={{ opacity: 0, y: -12, scale: 0.9 }}
           className="fixed right-4 top-[58px] z-[900] cursor-grab touch-none active:cursor-grabbing sm:right-24"
         >
-          <div className="flex items-center gap-3 rounded-full bg-white/90 py-1.5 pl-1.5 pr-3 shadow-[0_0_0_1.5px_#555,0_10px_24px_-10px_rgba(0,0,0,0.4)] backdrop-blur">
+          <div className="relative flex w-[290px] items-center gap-3 overflow-hidden rounded-2xl bg-white/85 p-2 pr-2.5 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.35)] ring-1 ring-black/[0.08] backdrop-blur-xl">
+            {/* cover — turns into a spinning record while playing */}
             <div
-              className="h-8 w-8 overflow-hidden rounded-md bg-linear-to-br from-sky-300 via-indigo-300 to-pink-300"
-              style={playing ? { animation: "spin-slow 6s linear infinite", borderRadius: 999 } : undefined}
+              className="relative h-11 w-11 shrink-0 overflow-hidden bg-linear-to-br from-sky-300 via-indigo-300 to-pink-300 shadow-sm transition-[border-radius] duration-300"
+              style={{ borderRadius: playing ? 999 : 10, animation: playing ? "spin-slow 6s linear infinite" : undefined }}
             >
               {music.cover && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={music.cover} alt="" className="h-full w-full object-cover" draggable={false} />
               )}
+              {playing && <span className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90 ring-1 ring-black/10" />}
             </div>
-            <div className="leading-tight">
-              <div className="text-[15px] font-medium text-neutral-900">{music.title}</div>
-              {missing && <div className="text-[10px] text-rose-500">add public/music/track.mp3</div>}
-            </div>
-            <div className="flex h-5 items-center gap-[3px]" aria-hidden>
-              {[0.9, 0.5, 1, 0.7, 0.4].map((h, i) => (
-                <span
-                  key={i}
-                  className="w-[3px] origin-center rounded-full bg-neutral-500"
-                  style={{
-                    height: `${h * 18}px`,
-                    animation: playing ? `eq ${0.6 + i * 0.13}s ease-in-out infinite` : undefined,
-                  }}
-                />
-              ))}
+            <div className="min-w-0 flex-1 leading-tight">
+              <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-400">
+                listening rn to
+                <span className="flex h-2.5 items-end gap-[2px]" aria-hidden>
+                  {[0.9, 0.5, 1, 0.7].map((h, i) => (
+                    <span
+                      key={i}
+                      className="w-[2px] origin-bottom rounded-full bg-accent"
+                      style={{ height: `${h * 10}px`, animation: playing ? `eq ${0.6 + i * 0.13}s ease-in-out infinite` : undefined, opacity: playing ? 1 : 0.35 }}
+                    />
+                  ))}
+                </span>
+              </div>
+              <div className="truncate text-[15px] font-semibold text-neutral-900">{music.title}</div>
+              {missing ? (
+                <div className="truncate text-[11px] text-rose-500">add public/music/track.mp3</div>
+              ) : (
+                music.artist && <div className="truncate text-[12px] text-neutral-500">{music.artist}</div>
+              )}
             </div>
             <button
               onPointerDown={(e) => e.stopPropagation()}
               onClick={toggle}
               aria-label={playing ? "pause" : "play"}
-              className="ml-1 flex h-7 w-7 items-center justify-center rounded-full text-neutral-900 hover:bg-neutral-100"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-white shadow-sm transition-transform hover:scale-105 active:scale-95"
             >
               {playing ? (
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
@@ -114,12 +121,26 @@ function MusicPill({ open }: { open: boolean }) {
                   <rect x="14" y="5" width="4" height="14" rx="1" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+                <svg viewBox="0 0 24 24" className="ml-0.5 h-4 w-4" fill="currentColor" aria-hidden>
                   <path d="M7 4.5v15l13-7.5z" />
                 </svg>
               )}
             </button>
-            <audio ref={audio} src={music.src} loop preload="none" onError={() => setMissing(true)} />
+            {/* hairline progress along the bottom */}
+            <span className="absolute inset-x-0 bottom-0 h-[2px] bg-black/5">
+              <span className="block h-full bg-accent" style={{ width: `${progress * 100}%` }} />
+            </span>
+            <audio
+              ref={audio}
+              src={music.src}
+              loop
+              preload="none"
+              onError={() => setMissing(true)}
+              onTimeUpdate={(e) => {
+                const a = e.currentTarget;
+                if (a.duration) setProgress(a.currentTime / a.duration);
+              }}
+            />
           </div>
         </motion.div>
       )}

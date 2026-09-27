@@ -7,7 +7,7 @@ export const profile = {
   handle: "atharva",
   role: "full-stack developer",
   tagline: "a backend-brained full-stack dev who builds apis that don't flinch",
-  location: "panvel, india",
+  location: "navi mumbai, india",
   email: "atharvashirke9503@gmail.com",
   github: "https://github.com/AtharvaShirke95032",
   githubHandle: "AtharvaShirke95032",
@@ -18,8 +18,8 @@ export const profile = {
 };
 
 export const music = {
-  title: "iPod Touch",
-  artist: "now playing",
+  title: "ghost town",
+  artist: undefined as string | undefined, // shown under the title when set
   src: "/music/track.mp3", // drop an mp3 at public/music/track.mp3
   cover: undefined as string | undefined, // e.g. "/media/cover.jpg"
 };

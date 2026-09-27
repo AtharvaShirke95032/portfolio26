@@ -635,12 +635,29 @@ export function Skills() {
   }, [seed]);
 
   return (
-    <section id="skills" className="relative py-24">
+    <section id="skills" className="relative overflow-hidden py-24">
+      {/* minimal backdrop: a hairline grid that fades out toward the edges */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 [background-image:linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)] [background-position:center_top] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_55%,black_35%,transparent_100%)]"
+      />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-24 hidden font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400 xl:block">
+        <span className="absolute left-10">/ toolbox</span>
+        <span className="absolute right-10">
+          {skills.reduce((n, g) => n + g.items.length, 0)} tools · {skills.length} groups
+        </span>
+      </div>
       <Chip>skills</Chip>
       <h2 className="mx-auto mt-6 max-w-xl px-4 text-center text-[clamp(32px,4.5vw,56px)] font-semibold leading-[1.05] tracking-[-0.04em]">
         my toolbox <span className="text-neutral-400">— go ahead, mess it up</span>
       </h2>
-      <div className="mx-auto mt-14 max-w-5xl px-4">
+      <div className="relative mx-auto mt-14 max-w-5xl px-4">
+        {/* crop marks at the window corners */}
+        {["-left-1 -top-4", "-right-1 -top-4", "-left-1 -bottom-4", "-right-1 -bottom-4"].map((pos) => (
+          <span key={pos} aria-hidden className={`pointer-events-none absolute hidden font-mono text-[14px] leading-none text-neutral-300 md:block ${pos}`}>
+            +
+          </span>
+        ))}
         <MacWindow title="skills.app" big>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-black/5 px-4 py-2.5 text-[13px] text-neutral-500">
             {skills.map((g) => (
@@ -726,15 +743,28 @@ export function Skills() {
 
 /* ------------------------------ contact ---------------------------- */
 
+const templates = [
+  { label: "we're hiring", icon: "📌", subject: "an opportunity at …", body: "hey atharva,\n\nwe're hiring for a … role and your work caught our eye. would you be up for a quick chat?\n\n" },
+  { label: "let's collab", icon: "🤝", subject: "collab idea", body: "hey atharva,\n\ni'm building … and think we could make something cool together.\n\n" },
+  { label: "just saying hi", icon: "👋", subject: "hey 👋", body: "hey atharva,\n\njust wanted to say the site is fun. " },
+];
+
 export function Contact() {
   const ref = useRef<HTMLElement>(null);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [copied, setCopied] = useState(false);
   const send = () => {
     const q = new URLSearchParams({ subject: subject || "hey atharva 👋", body });
     window.location.href = `mailto:${profile.email}?${q.toString().replace(/\+/g, "%20")}`;
   };
-  const field = "w-full bg-transparent py-2.5 text-[15px] text-neutral-900 outline-none placeholder:text-neutral-400";
+  const copy = () => {
+    navigator.clipboard?.writeText(profile.email).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+  const field = "w-full bg-transparent py-3 text-[15px] text-neutral-900 outline-none placeholder:text-neutral-400";
 
   return (
     <section id="contact" ref={ref} className="dots relative pb-40 pt-24">
@@ -744,27 +774,70 @@ export function Contact() {
       </h2>
       <div className="mx-auto mt-14 grid max-w-5xl items-start gap-8 px-4 md:grid-cols-[1.5fr_1fr]">
         <Draggable id="compose" bounds={ref} trashable={false}>
-          <MacWindow title="new message" big>
-            <div className="px-5" onPointerDown={(e) => e.stopPropagation()}>
-              <div className="flex items-center gap-2 border-b border-black/5">
-                <span className="w-16 text-[14px] text-neutral-400">to:</span>
-                <span className="rounded-md bg-sky-100 px-2 py-0.5 text-[14px] text-sky-700">{profile.email}</span>
+          <MacWindow
+            title="new message"
+            big
+            icon={<span className="text-[13px] leading-none text-neutral-400">✉︎</span>}
+          >
+            <div onPointerDown={(e) => e.stopPropagation()}>
+              {/* mail-style header fields */}
+              <div className="flex items-center gap-3 border-b border-black/5 px-5 py-2.5">
+                <span className="w-[72px] shrink-0 text-[13px] text-neutral-400">to</span>
+                <span className="flex min-w-0 items-center gap-2 rounded-full bg-neutral-100 py-0.5 pl-0.5 pr-3 ring-1 ring-black/5">
+                  <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-neutral-200">
+                    <Photo src={profile.photo} alt="" caption={false} />
+                  </span>
+                  <span className="truncate text-[14px] text-neutral-800">{profile.email}</span>
+                </span>
+                <button
+                  onClick={copy}
+                  className="ml-auto shrink-0 rounded-md px-2 py-1 text-[12px] text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
+                >
+                  {copied ? "copied ✓" : "copy"}
+                </button>
               </div>
-              <label className="flex items-center gap-2 border-b border-black/5">
-                <span className="w-16 text-[14px] text-neutral-400">subject:</span>
+              <label className="flex items-center gap-3 border-b border-black/5 px-5">
+                <span className="w-[72px] shrink-0 text-[13px] text-neutral-400">subject</span>
                 <input className={field} value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="let's build something" />
               </label>
+              {/* one-tap starters */}
+              <div className="flex items-center gap-3 border-b border-black/5 bg-neutral-50/70 px-5 py-2">
+                <span className="w-[72px] shrink-0 text-[13px] text-neutral-400">start with</span>
+                <div className="flex flex-wrap gap-1.5">
+                {templates.map((t) => (
+                  <button
+                    key={t.label}
+                    onClick={() => {
+                      setSubject(t.subject);
+                      setBody(t.body);
+                    }}
+                    className="rounded-full bg-white px-2.5 py-0.5 text-[12px] text-neutral-600 ring-1 ring-black/10 transition-colors hover:text-neutral-900 hover:ring-black/20"
+                  >
+                    {t.icon} {t.label}
+                  </button>
+                ))}
+                </div>
+              </div>
               <textarea
-                className={`${field} min-h-[180px] resize-none`}
+                className={`${field} block min-h-[200px] resize-none px-5 leading-relaxed`}
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send();
+                }}
                 placeholder="hey atharva, loved the trash can. we're hiring for…"
                 aria-label="message"
               />
-              <div className="flex items-center justify-between border-t border-black/5 py-3">
-                <span className="text-[12px] text-neutral-400">opens your mail app</span>
-                <button onClick={send} className="glossy-blue rounded-full px-5 py-1.5 text-[15px] font-medium text-white">
-                  send ↗
+              <div className="flex items-center justify-between gap-3 border-t border-black/5 bg-[#f6f6f6]/80 px-5 py-3">
+                <span className="text-[12px] text-neutral-400">
+                  <kbd className="rounded border border-black/10 bg-white px-1 font-sans">⌘</kbd>{" "}
+                  <kbd className="rounded border border-black/10 bg-white px-1 font-sans">↵</kbd> to send · opens your mail app
+                </span>
+                <button onClick={send} className="glossy-blue flex shrink-0 items-center gap-1.5 rounded-full px-5 py-1.5 text-[15px] font-medium text-white">
+                  send
+                  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
+                    <path d="M1.5 1.8 15 8 1.5 14.2l1.6-5.4L10 8 3.1 7.2Z" />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -789,7 +862,27 @@ export function Contact() {
               </div>
             </Draggable>
           ))}
-          <p className="px-1 pt-2 font-hand text-[22px] leading-tight text-neutral-500">based in {profile.location} — happy to relocate or go remote.</p>
+          <div className="flex items-end gap-3 pt-1">
+            <p className="flex-1 pb-2 font-hand text-[22px] leading-tight text-neutral-500">
+              based in {profile.location.split(",")[0]} — happy to relocate or go remote.
+            </p>
+            <Draggable id="facetime-cat" bounds={ref} trashable={false} rotate={2.5} delay={0.2} className="w-[230px] shrink-0">
+              <MacWindow title="facetime" bodyClassName="bg-white">
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/media/cat-eat.webp" alt="a cat eating, staring into the camera" className="aspect-square w-full object-cover" draggable={false} />
+                  <span className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-black/45 px-2 py-0.5 text-[11px] text-white backdrop-blur-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500" style={{ animation: "blink 1.2s steps(1) infinite" }} />
+                    live
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2 border-t border-black/5 px-3 py-2">
+                  <span className="text-[12px] leading-tight text-neutral-600">me, waiting for your email</span>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500 text-[11px] text-white">✕</span>
+                </div>
+              </MacWindow>
+            </Draggable>
+          </div>
         </div>
       </div>
       <footer className="mt-24 text-center text-[13px] text-neutral-400">
