@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import {
   AnimatePresence,
   motion,
@@ -521,9 +521,9 @@ export function Experience() {
                   </button>
                 ))}
               </div>
-              <div className="grid grid-cols-[1.4fr_1fr_auto] gap-3 border-b border-black/5 px-4 py-2 text-[12px] text-neutral-400">
+              <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-black/5 px-4 py-2 text-[12px] text-neutral-400 sm:grid-cols-[1.4fr_1fr_auto]">
                 <span>name</span>
-                <span>org</span>
+                <span className="hidden sm:block">org</span>
                 <span className="text-right">date</span>
               </div>
               <AnimatePresence initial={false} mode="popLayout">
@@ -538,7 +538,7 @@ export function Experience() {
                     onPointerDown={(ev) => ev.stopPropagation()}
                     onClick={() => (sel === e.id ? open(e) : setSel(e.id))}
                     onDoubleClick={() => open(e)}
-                    className={`group grid w-full grid-cols-[1.4fr_1fr_auto] items-center gap-3 px-4 py-3 text-left text-[14px] ${
+                    className={`group grid w-full grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 text-left text-[14px] sm:grid-cols-[1.4fr_1fr_auto] ${
                       sel === e.id ? "bg-accent text-white" : i % 2 ? "bg-neutral-50/70 hover:bg-neutral-100" : "hover:bg-neutral-100"
                     }`}
                   >
@@ -546,9 +546,12 @@ export function Experience() {
                       <span className="h-5 w-6 shrink-0 transition-transform group-hover:-rotate-6 group-hover:scale-110">
                         <Folder color={kindColor[e.kind]} />
                       </span>
-                      <span className="truncate font-medium">{e.title}</span>
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium">{e.title}</span>
+                        <span className={`block truncate text-[12px] sm:hidden ${sel === e.id ? "text-white/85" : "text-neutral-500"}`}>{e.org}</span>
+                      </span>
                     </span>
-                    <span className={`truncate ${sel === e.id ? "text-white/85" : "text-neutral-500"}`}>{e.org}</span>
+                    <span className={`hidden truncate sm:block ${sel === e.id ? "text-white/85" : "text-neutral-500"}`}>{e.org}</span>
                     <span className={`text-right tabular-nums ${sel === e.id ? "text-white/85" : "text-neutral-400"}`}>{e.dates}</span>
                   </motion.button>
                 ))}
@@ -557,27 +560,31 @@ export function Experience() {
                 <a
                   href={`mailto:${profile.email}`}
                   onPointerDown={(ev) => ev.stopPropagation()}
-                  className="group mx-3 mt-2 grid grid-cols-[1.4fr_1fr_auto] items-center gap-3 rounded-lg border-[1.5px] border-dashed border-neutral-300 px-3 py-2.5 text-[14px] text-neutral-400 transition-colors hover:border-accent hover:text-accent"
+                  className="group mx-3 mt-2 grid grid-cols-[1fr_auto] items-center gap-3 sm:grid-cols-[1.4fr_1fr_auto] rounded-lg border-[1.5px] border-dashed border-neutral-300 px-3 py-2.5 text-[14px] text-neutral-400 transition-colors hover:border-accent hover:text-accent"
                 >
                   <span className="flex items-center gap-2 truncate">
                     <span className="h-5 w-6 shrink-0 opacity-40 transition-all group-hover:rotate-6 group-hover:opacity-100">
                       <Folder color="#d4d4d4" />
                     </span>
-                    <span className="truncate">untitled role</span>
+                    <span className="truncate">
+                      untitled role<span className="sm:hidden"> · your company?</span>
+                    </span>
                   </span>
-                  <span className="truncate">your company?</span>
+                  <span className="hidden truncate sm:block">your company?</span>
                   <span className="text-right tabular-nums">2027 — ∞</span>
                 </a>
               )}
               <p className="px-4 py-3 text-[12px] text-neutral-400">click once to select, again to open ↗</p>
               {/* finder status bar */}
               <div className="mt-auto flex items-center gap-1.5 border-t border-black/5 bg-[#f6f6f6]/80 px-4 py-1.5 text-[11px] text-neutral-400">
-                <span>macintosh hd</span>›<span>atharva</span>›<span>experience</span>
-                {current && (
-                  <>
-                    ›<span className="truncate text-neutral-600">{current.org}</span>
-                  </>
-                )}
+                <span className="hidden min-w-0 items-center gap-1.5 sm:flex">
+                  <span>macintosh hd</span>›<span>atharva</span>›<span>experience</span>
+                  {current && (
+                    <>
+                      ›<span className="truncate text-neutral-600">{current.org}</span>
+                    </>
+                  )}
+                </span>
                 <span className="ml-auto shrink-0">{rows.length} items</span>
               </div>
             </div>
@@ -614,25 +621,33 @@ function usedIn(skill: string): string[] {
   return [...new Set([...fromProjects, ...fromEntries, ...(skillUses[skill] ?? [])])];
 }
 
+const subscribeNarrow = (cb: () => void) => {
+  const m = matchMedia("(max-width: 639px)");
+  m.addEventListener("change", cb);
+  return () => m.removeEventListener("change", cb);
+};
+
 export function Skills() {
   const board = useRef<HTMLDivElement>(null);
+  const narrow = useSyncExternalStore(subscribeNarrow, () => matchMedia("(max-width: 639px)").matches, () => false);
   const [seed, setSeed] = useState(7);
   const [picked, setPicked] = useState<string | null>(null);
   const chips = useMemo(() => {
     const rnd = seeded(seed);
     const all = skills.flatMap((g) => g.items.map((name) => ({ name, color: g.color })));
-    const cols = 5;
+    const cols = narrow ? 2 : 5;
     const rowsN = Math.ceil(all.length / cols);
+    const [jx, jy, tilt] = narrow ? [4, 1.5, 8] : [6, 8, 16];
     return all
       .map((c) => ({ c, r: rnd() }))
       .sort((a, b) => a.r - b.r)
       .map(({ c }, i) => ({
         ...c,
-        left: ((i % cols) / cols) * 88 + rnd() * 6 + 1,
-        top: (Math.floor(i / cols) / rowsN) * 82 + rnd() * 8 + 4,
-        rot: (rnd() - 0.5) * 16,
+        left: ((i % cols) / cols) * 88 + rnd() * jx + 1,
+        top: (Math.floor(i / cols) / rowsN) * 82 + rnd() * jy + 4,
+        rot: (rnd() - 0.5) * tilt,
       }));
-  }, [seed]);
+  }, [seed, narrow]);
 
   return (
     <section id="skills" className="relative overflow-hidden py-24">
@@ -670,7 +685,7 @@ export function Skills() {
               🎲 shuffle
             </button>
           </div>
-          <div ref={board} className="dots relative h-[520px] overflow-hidden bg-[#fafafa] sm:h-[420px]">
+          <div ref={board} className="dots relative h-[660px] overflow-hidden bg-[#fafafa] sm:h-[420px]">
             {/* the janitor, mopping up the corner (sits under the chips so it never blocks one) */}
             <div className="pointer-events-none absolute bottom-0 right-4 w-[92px] sm:w-[110px]" aria-hidden>
               <span className="absolute -bottom-1 left-2 right-0 h-3 rounded-[50%] bg-sky-200/40 blur-[3px]" />
@@ -679,7 +694,7 @@ export function Skills() {
             </div>
             {chips.map((c, i) => (
               <Draggable
-                key={`${seed}-${c.name}`}
+                key={`${seed}-${narrow}-${c.name}`}
                 id={`skill-${seed}-${c.name}`}
                 bounds={board}
                 trashable={false}
@@ -773,7 +788,7 @@ export function Contact() {
         say hi <span className="text-neutral-400">— i reply fast</span>
       </h2>
       <div className="mx-auto mt-14 grid max-w-5xl items-start gap-8 px-4 md:grid-cols-[1.5fr_1fr]">
-        <Draggable id="compose" bounds={ref} trashable={false}>
+        <Draggable id="compose" bounds={ref} trashable={false} className="min-w-0">
           <MacWindow
             title="new message"
             big
@@ -782,7 +797,7 @@ export function Contact() {
             <div onPointerDown={(e) => e.stopPropagation()}>
               {/* mail-style header fields */}
               <div className="flex items-center gap-3 border-b border-black/5 px-5 py-2.5">
-                <span className="w-[72px] shrink-0 text-[13px] text-neutral-400">to</span>
+                <span className="w-14 shrink-0 text-[13px] text-neutral-400 sm:w-[72px]">to</span>
                 <span className="flex min-w-0 items-center gap-2 rounded-full bg-neutral-100 py-0.5 pl-0.5 pr-3 ring-1 ring-black/5">
                   <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-neutral-200">
                     <Photo src={profile.photo} alt="" caption={false} />
@@ -797,12 +812,12 @@ export function Contact() {
                 </button>
               </div>
               <label className="flex items-center gap-3 border-b border-black/5 px-5">
-                <span className="w-[72px] shrink-0 text-[13px] text-neutral-400">subject</span>
-                <input className={field} value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="let's build something" />
+                <span className="w-14 shrink-0 text-[13px] text-neutral-400 sm:w-[72px]">subject</span>
+                <input className={`${field} min-w-0`} value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="let's build something" />
               </label>
               {/* one-tap starters */}
               <div className="flex items-center gap-3 border-b border-black/5 bg-neutral-50/70 px-5 py-2">
-                <span className="w-[72px] shrink-0 text-[13px] text-neutral-400">start with</span>
+                <span className="w-14 shrink-0 text-[13px] text-neutral-400 sm:w-[72px]">start with</span>
                 <div className="flex flex-wrap gap-1.5">
                 {templates.map((t) => (
                   <button
@@ -830,8 +845,11 @@ export function Contact() {
               />
               <div className="flex items-center justify-between gap-3 border-t border-black/5 bg-[#f6f6f6]/80 px-5 py-3">
                 <span className="text-[12px] text-neutral-400">
+                  <span className="hidden sm:inline">
                   <kbd className="rounded border border-black/10 bg-white px-1 font-sans">⌘</kbd>{" "}
-                  <kbd className="rounded border border-black/10 bg-white px-1 font-sans">↵</kbd> to send · opens your mail app
+                  <kbd className="rounded border border-black/10 bg-white px-1 font-sans">↵</kbd> to send ·{" "}
+                  </span>
+                  opens your mail app
                 </span>
                 <button onClick={send} className="glossy-blue flex shrink-0 items-center gap-1.5 rounded-full px-5 py-1.5 text-[15px] font-medium text-white">
                   send
@@ -844,7 +862,7 @@ export function Contact() {
           </MacWindow>
         </Draggable>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           {[
             { href: profile.github, label: "github", sub: `@${profile.githubHandle}`, icon: <GithubIcon className="h-5 w-5" />, bg: "bg-neutral-900" },
             { href: profile.linkedin, label: "linkedin", sub: "atharva shirke", icon: <LinkedinIcon className="h-5 w-5" />, bg: "bg-[#0a66c2]" },
@@ -866,9 +884,10 @@ export function Contact() {
             <p className="flex-1 pb-2 font-hand text-[22px] leading-tight text-neutral-500">
               based in {profile.location.split(",")[0]} — happy to relocate or go remote.
             </p>
-            <Draggable id="facetime-cat" bounds={ref} trashable={false} rotate={2.5} delay={0.2} className="w-[230px] shrink-0">
-              <MacWindow title="facetime" bodyClassName="light-island bg-white">
-                <div className="relative">
+            <Draggable id="facetime-cat" bounds={ref} trashable={false} rotate={2.5} delay={0.2} className="w-[180px] shrink-0 sm:w-[230px]">
+              <MacWindow title="facetime" bodyClassName="bg-white">
+                {/* only the video stays light (hides the gif's white edges); the caption follows the theme */}
+                <div className="light-island relative bg-white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/media/cat-eat.webp" alt="a cat eating, staring into the camera" className="aspect-square w-full object-cover" draggable={false} />
                   <span className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-black/45 px-2 py-0.5 text-[11px] text-white backdrop-blur-sm">
@@ -885,7 +904,7 @@ export function Contact() {
           </div>
         </div>
       </div>
-      <footer className="mt-24 text-center text-[13px] text-neutral-400">
+      <footer className="mt-24 px-4 text-center text-[13px] text-neutral-400">
         made with ☕ and way too many tabs · © {new Date().getFullYear()} {profile.name}
       </footer>
     </section>

@@ -87,7 +87,7 @@ export default function Hero() {
   const lg = "hidden lg:block";
 
   return (
-    <section id="top" ref={ref} className="dots relative min-h-[100svh] overflow-hidden pt-[52px] lg:min-h-[900px]">
+    <section id="top" ref={ref} className="dots relative min-h-[max(100svh,760px)] overflow-hidden pt-[52px] lg:min-h-[900px]">
       {/* center copy */}
       <div className="pointer-events-none relative z-0 flex min-h-[calc(100svh-52px)] flex-col items-center justify-center px-4 text-center lg:min-h-[848px]">
         <motion.p
@@ -145,15 +145,36 @@ export default function Hero() {
         </p>
       </div>
 
+      {/* ---------- phone + tablet desk: smaller copies so the hero isn't bare ---------- */}
+      <FloatWindow id="m-photo" file="me.png" w={92} h={100} pos={{ left: "4%", top: "8%" }} bounds={ref} delay={0.1} rotate={-3} className="lg:hidden"
+        onOpen={() => openModal({ title: "me.png", content: <PhotoDetail />, width: 460 })}>
+        <Photo src={profile.photo} alt={profile.name} caption={false} />
+      </FloatWindow>
+
+      <Draggable id="m-k1" label="^ ω ^" bounds={ref} style={{ position: "absolute", left: "37%", top: "12%" }} className="lg:hidden" delay={0.3}>
+        <Kaomoji start={0} />
+      </Draggable>
+
+      <Draggable id="m-mc-cat" label="minecraft cat" bounds={ref} style={{ position: "absolute", left: "34%", top: "83%" }} className="lg:hidden" delay={0.45} rotate={-3}
+        title="do not disturb">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/media/minecraft-cat.png" alt="minecraft cat lying down" className="w-[120px] drop-shadow-[0_6px_6px_rgba(0,0,0,0.18)]" draggable={false} />
+      </Draggable>
+
+      <Draggable id="m-pdf" label="resume.pdf" bounds={ref} style={{ position: "absolute", right: "7%", top: "80%" }} className="lg:hidden" delay={0.65}
+        onOpen={() => window.open(profile.resume, "_blank")}>
+        <PdfFile label="resume.pdf" />
+      </Draggable>
+
       {/* ---------- floating desktop junk ---------- */}
       <FloatWindow id="w-photo" file="me.png" w={150} h={200} pos={{ left: "7%", top: "13%" }} bounds={ref} delay={0.1} className={lg}
         onOpen={() => openModal({ title: "me.png", content: <PhotoDetail />, width: 460 })}>
         <Photo src={profile.photo} alt={profile.name} />
       </FloatWindow>
 
-      <Draggable id="nerd-cat" label="nerd cat" bounds={ref} style={{ position: "absolute", left: "4%", top: "15%" }} className="lg:!left-[23%] lg:!top-[10%]" delay={0.2} rotate={-4}
+      <Draggable id="nerd-cat" label="nerd cat" bounds={ref} style={{ position: "absolute", right: "4%", top: "8%" }} className="lg:!right-auto lg:!left-[23%] lg:!top-[10%]" delay={0.2} rotate={-4}
         title="um, actually…">
-        <div className="w-[118px] bg-white p-1.5 pb-5 shadow-[0_8px_18px_-8px_rgba(0,0,0,0.4)] ring-1 ring-black/5">
+        <div className="w-[92px] bg-white p-1.5 pb-5 sm:w-[118px] shadow-[0_8px_18px_-8px_rgba(0,0,0,0.4)] ring-1 ring-black/5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/media/nerd-cat.png" alt="nerd cat" className="aspect-square w-full object-cover" draggable={false} />
           <p className="mt-1 text-center font-hand text-[15px] leading-none text-neutral-700">um, actually…</p>
@@ -173,7 +194,7 @@ export default function Hero() {
         <Kaomoji start={3} />
       </Draggable>
 
-      <Draggable id="ball" label="beach ball" bounds={ref} style={{ position: "absolute", right: "10%", top: "86%" }} className="lg:!left-[56%] lg:!right-auto lg:!top-[34%]" delay={0.5}>
+      <Draggable id="ball" label="beach ball" bounds={ref} style={{ position: "absolute", left: "58%", top: "22%" }} className="lg:!left-[56%] lg:!top-[34%]" delay={0.5}>
         <BeachBall className="h-7 w-7" />
       </Draggable>
 
