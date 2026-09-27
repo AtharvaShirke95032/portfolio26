@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
+  AnimatePresence,
   motion,
   useAnimationFrame,
   useInView,
@@ -12,7 +13,7 @@ import {
   type MotionValue,
 } from "motion/react";
 import { entries, profile, projects, skills, type Entry } from "@/lib/data";
-import { Photo } from "./arts";
+import { Media, Photo } from "./arts";
 import { MacWindow, useDesktop } from "./desktop";
 import { EntryDetail, Pill, ProjectDetail, projectArt } from "./details";
 import Draggable from "./Draggable";
@@ -305,24 +306,124 @@ const kinds: { key: "all" | Entry["kind"]; label: string; icon: string }[] = [
   { key: "leadership", label: "leadership", icon: "✨" },
 ];
 
+const kindColor: Record<Entry["kind"], string> = { work: "#7cb6f0", education: "#a3e635", leadership: "#f472b6" };
+
+function ExpPreview({ e, onOpen }: { e: Entry; onOpen: () => void }) {
+  return (
+    <motion.div
+      key={e.id}
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -12 }}
+      transition={{ duration: 0.2 }}
+      className="flex h-full flex-col p-5"
+    >
+      {e.id === "reliance" ? (
+        <div className="aspect-[4/3] overflow-hidden rounded-lg ring-1 ring-black/5">
+          <Media src="/media/reliance-desk.jpg" alt="my desk at reliance">
+            {null}
+          </Media>
+        </div>
+      ) : (
+        <div className="flex aspect-[4/3] items-center justify-center rounded-lg bg-linear-to-b from-neutral-50 to-neutral-100 ring-1 ring-black/5">
+          <motion.div className="h-24 w-32" initial={{ rotate: -8, scale: 0.8 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 14 }}>
+            <Folder color={kindColor[e.kind]} className="h-full w-full" />
+          </motion.div>
+        </div>
+      )}
+      <p className="mt-4 text-[11px] font-semibold uppercase tracking-widest" style={{ color: kindColor[e.kind] }}>
+        {e.kind}
+      </p>
+      <h3 className="mt-0.5 text-[17px] font-semibold leading-snug tracking-tight">{e.title}</h3>
+      <p className="text-[13px] text-neutral-500">{e.org}</p>
+      <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-black/5 pt-3 text-[12px]">
+        <dt className="text-neutral-400">when</dt>
+        <dd className="text-neutral-700">{e.dates}</dd>
+        <dt className="text-neutral-400">where</dt>
+        <dd className="text-neutral-700">{e.place}</dd>
+      </dl>
+      <ul className="mt-3 space-y-1 text-[12.5px] leading-snug text-neutral-600">
+        {e.bullets.slice(0, 2).map((b) => (
+          <li key={b} className="flex gap-1.5">
+            <span className="text-neutral-300">▸</span>
+            <span className="line-clamp-2">{b}</span>
+          </li>
+        ))}
+      </ul>
+      {e.stack && (
+        <div className="mt-3 flex flex-wrap gap-1">
+          {e.stack.map((s) => (
+            <Pill key={s}>{s}</Pill>
+          ))}
+        </div>
+      )}
+      <div className="mt-auto pt-4">
+        <button
+          onPointerDown={(ev) => ev.stopPropagation()}
+          onClick={onOpen}
+          className="flex w-full items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 text-[13px] font-medium text-neutral-700 ring-1 ring-black/5 transition-colors hover:bg-accent hover:text-white"
+        >
+          read more
+          <span aria-hidden>↗</span>
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 export function Experience() {
   const ref = useRef<HTMLElement>(null);
   const { openModal } = useDesktop();
   const [filter, setFilter] = useState<(typeof kinds)[number]["key"]>("all");
-  const [sel, setSel] = useState<string | null>(null);
+  const [sel, setSel] = useState<string | null>(entries[0].id);
   const rows = entries.filter((e) => filter === "all" || e.kind === filter);
   const open = (e: Entry) => openModal({ title: e.org, content: <EntryDetail e={e} />, width: 640 });
+  const current = entries.find((e) => e.id === sel);
 
   return (
-    <section id="experience" ref={ref} className="relative py-24">
+    <section id="experience" ref={ref} className="relative overflow-hidden py-24">
       <Chip>experience</Chip>
       <h2 className="mx-auto mt-6 max-w-xl px-4 text-center text-[clamp(32px,4.5vw,56px)] font-semibold leading-[1.05] tracking-[-0.04em]">
         where i&apos;ve been <span className="text-neutral-400">shipping</span>
       </h2>
-      <div className="mx-auto mt-14 max-w-5xl px-4">
+
+      {/* desk clutter — all draggable, big screens only */}
+      <div className="pointer-events-none absolute inset-0 z-10 hidden xl:block">
+        <Draggable id="exp-polaroid" bounds={ref} trashable={false} rotate={-5} delay={0.2} className="pointer-events-auto absolute left-[3%] top-24">
+          <div className="w-[190px] bg-white p-2.5 pb-3 shadow-[0_12px_24px_-10px_rgba(0,0,0,0.35)]">
+            <div className="aspect-square overflow-hidden">
+              <Media src="/media/reliance-desk.jpg" alt="my desk at reliance">
+                {null}
+              </Media>
+            </div>
+            <p className="mt-2 text-center font-hand text-[18px] leading-none text-neutral-700">desk @ reliance &apos;26</p>
+          </div>
+          <span className="absolute -top-3 left-1/2 h-6 w-16 -translate-x-1/2 rotate-3 bg-[#f5e6a8]/80" />
+        </Draggable>
+
+        <Draggable id="exp-sticky" bounds={ref} trashable={false} rotate={5} delay={0.35} className="pointer-events-auto absolute right-[3%] top-40">
+          <div className="w-[170px] bg-[#c7f0d8] p-3.5 font-hand text-[20px] leading-tight text-neutral-800 shadow-[0_8px_16px_-8px_rgba(0,0,0,0.35)]">
+            next up:
+            <br />
+            <span className="line-through decoration-2 opacity-50">intern @ reliance</span>
+            <br />
+            your team? 👀
+          </div>
+        </Draggable>
+
+        <Draggable id="exp-broke-cat" bounds={ref} trashable={false} rotate={-3} delay={0.5} className="pointer-events-auto absolute right-[1%] top-[540px]">
+          <div className="w-[180px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/media/broke-cat.png" alt="cat holding an empty wallet" className="w-full drop-shadow-[0_10px_14px_rgba(0,0,0,0.18)]" draggable={false} />
+            <p className="-mt-1 text-center font-hand text-[22px] leading-tight text-neutral-600">pls hire 🙏</p>
+          </div>
+        </Draggable>
+      </div>
+
+      <div className="relative mx-auto mt-14 max-w-5xl px-4">
         <Draggable id="finder" bounds={ref} trashable={false}>
-          <MacWindow title="experience" big bodyClassName="flex min-h-[360px]">
-            <aside className="hidden w-48 shrink-0 space-y-0.5 border-r border-black/5 bg-[#f6f6f6]/80 p-3 text-[14px] sm:block">
+          <MacWindow title="experience" big bodyClassName="flex min-h-[420px]">
+            <aside className="hidden w-44 shrink-0 space-y-0.5 border-r border-black/5 bg-[#f6f6f6]/80 p-3 text-[14px] sm:block">
               <p className="px-2 pb-1 text-[11px] font-semibold text-neutral-400">favorites</p>
               {kinds.map((k) => (
                 <button
@@ -335,6 +436,9 @@ export function Experience() {
                 >
                   <span>{k.icon}</span>
                   {k.label}
+                  <span className="ml-auto text-[11px] text-neutral-400">
+                    {k.key === "all" ? entries.length : entries.filter((e) => e.kind === k.key).length}
+                  </span>
                 </button>
               ))}
               <p className="px-2 pb-1 pt-4 text-[11px] font-semibold text-neutral-400">tags</p>
@@ -344,7 +448,7 @@ export function Experience() {
                 </p>
               ))}
             </aside>
-            <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col">
               <div className="flex gap-1 overflow-x-auto border-b border-black/5 p-2 sm:hidden">
                 {kinds.map((k) => (
                   <button
@@ -357,38 +461,73 @@ export function Experience() {
                   </button>
                 ))}
               </div>
-              <div className="grid grid-cols-[1.4fr_1fr_auto] gap-3 border-b border-black/5 px-4 py-2 text-[12px] text-neutral-400 md:grid-cols-[1.4fr_1fr_0.8fr_auto]">
+              <div className="grid grid-cols-[1.4fr_1fr_auto] gap-3 border-b border-black/5 px-4 py-2 text-[12px] text-neutral-400">
                 <span>name</span>
                 <span>org</span>
-                <span className="hidden md:block">kind</span>
                 <span className="text-right">date</span>
               </div>
-              {rows.map((e, i) => (
-                <button
-                  key={e.id}
+              <AnimatePresence initial={false} mode="popLayout">
+                {rows.map((e, i) => (
+                  <motion.button
+                    key={e.id}
+                    layout
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.18, delay: i * 0.03 }}
+                    onPointerDown={(ev) => ev.stopPropagation()}
+                    onClick={() => (sel === e.id ? open(e) : setSel(e.id))}
+                    onDoubleClick={() => open(e)}
+                    className={`group grid w-full grid-cols-[1.4fr_1fr_auto] items-center gap-3 px-4 py-3 text-left text-[14px] ${
+                      sel === e.id ? "bg-accent text-white" : i % 2 ? "bg-neutral-50/70 hover:bg-neutral-100" : "hover:bg-neutral-100"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <span className="h-5 w-6 shrink-0 transition-transform group-hover:-rotate-6 group-hover:scale-110">
+                        <Folder color={kindColor[e.kind]} />
+                      </span>
+                      <span className="truncate font-medium">{e.title}</span>
+                    </span>
+                    <span className={`truncate ${sel === e.id ? "text-white/85" : "text-neutral-500"}`}>{e.org}</span>
+                    <span className={`text-right tabular-nums ${sel === e.id ? "text-white/85" : "text-neutral-400"}`}>{e.dates}</span>
+                  </motion.button>
+                ))}
+              </AnimatePresence>
+              {filter === "all" && (
+                <a
+                  href={`mailto:${profile.email}`}
                   onPointerDown={(ev) => ev.stopPropagation()}
-                  onClick={() => (sel === e.id ? open(e) : setSel(e.id))}
-                  onDoubleClick={() => open(e)}
-                  className={`grid w-full grid-cols-[1.4fr_1fr_auto] items-center gap-3 px-4 py-3 text-left text-[14px] md:grid-cols-[1.4fr_1fr_0.8fr_auto] ${
-                    sel === e.id ? "bg-accent text-white" : i % 2 ? "bg-neutral-50/70" : ""
-                  }`}
+                  className="group mx-3 mt-2 grid grid-cols-[1.4fr_1fr_auto] items-center gap-3 rounded-lg border-[1.5px] border-dashed border-neutral-300 px-3 py-2.5 text-[14px] text-neutral-400 transition-colors hover:border-accent hover:text-accent"
                 >
                   <span className="flex items-center gap-2 truncate">
-                    <span className="h-5 w-6 shrink-0">
-                      <Folder color={e.kind === "work" ? "#7cb6f0" : e.kind === "education" ? "#a3e635" : "#f472b6"} />
+                    <span className="h-5 w-6 shrink-0 opacity-40 transition-all group-hover:rotate-6 group-hover:opacity-100">
+                      <Folder color="#d4d4d4" />
                     </span>
-                    <span className="truncate font-medium">{e.title}</span>
+                    <span className="truncate">untitled role</span>
                   </span>
-                  <span className={`truncate ${sel === e.id ? "text-white/85" : "text-neutral-500"}`}>{e.org}</span>
-                  <span className={`hidden md:block ${sel === e.id ? "text-white/85" : "text-neutral-400"}`}>{e.kind}</span>
-                  <span className={`text-right tabular-nums ${sel === e.id ? "text-white/85" : "text-neutral-400"}`}>{e.dates}</span>
-                </button>
-              ))}
-              <p className="px-4 py-4 text-[12px] text-neutral-400">click once to select, again to open ↗</p>
+                  <span className="truncate">your company?</span>
+                  <span className="text-right tabular-nums">2027 — ∞</span>
+                </a>
+              )}
+              <p className="px-4 py-3 text-[12px] text-neutral-400">click once to select, again to open ↗</p>
+              {/* finder status bar */}
+              <div className="mt-auto flex items-center gap-1.5 border-t border-black/5 bg-[#f6f6f6]/80 px-4 py-1.5 text-[11px] text-neutral-400">
+                <span>macintosh hd</span>›<span>atharva</span>›<span>experience</span>
+                {current && (
+                  <>
+                    ›<span className="truncate text-neutral-600">{current.org}</span>
+                  </>
+                )}
+                <span className="ml-auto shrink-0">{rows.length} items</span>
+              </div>
+            </div>
+            <div className="hidden w-[270px] shrink-0 border-l border-black/5 lg:block">
+              <AnimatePresence mode="wait">{current && <ExpPreview e={current} onOpen={() => open(current)} />}</AnimatePresence>
             </div>
           </MacWindow>
         </Draggable>
       </div>
+
     </section>
   );
 }

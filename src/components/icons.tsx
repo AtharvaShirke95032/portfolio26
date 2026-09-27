@@ -66,7 +66,8 @@ export const LinkedinIcon = ({ className }: P) => (
 /* ---------------- stickers ---------------- */
 
 export function Folder({ color = "#7cb6f0", className, label }: P & { color?: string; label?: string }) {
-  const id = `f${color.replace("#", "")}`;
+  // unique per instance: a shared id breaks when the first copy sits in a display:none subtree
+  const id = `f${useId().replace(/:/g, "")}`;
   return (
     <div className={`flex flex-col items-center gap-1 ${className ?? ""}`}>
       <svg viewBox="0 0 64 50" className="h-full w-full drop-shadow-sm" aria-hidden>
