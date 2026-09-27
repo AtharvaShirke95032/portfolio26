@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode, type RefObject } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useMotionValue } from "motion/react";
 import { useDesktop } from "./desktop";
 
 type Props = {
@@ -57,7 +57,26 @@ export default function Draggable({
   const [z, setZ] = useState<number | undefined>(undefined);
   const dragged = useRef(false);
   const gone = isTrashed(id);
-  const tapOnly = useTapOnly() && !touchDrag;
+  const touch = useTapOnly();
+  const tapOnly = touch && !touchDrag;
+  // on phones the address bar showing/hiding fires resizes mid-scroll, and ref-based
+  // constraints get re-measured (and the item re-projected) on every one — which can
+  // fling it outside the clipped section. so on touch we measure plain limits once,
+  // when the finger goes down, and motion never rescales those.
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const [limits] = useState(() => ({ top: 0, left: 0, right: 0, bottom: 0 }));
+  const measureLimits = (el: HTMLElement) => {
+    const box = bounds?.current?.getBoundingClientRect();
+    if (!box) return;
+    const r = el.getBoundingClientRect();
+    Object.assign(limits, {
+      left: x.get() + box.left - r.left,
+      right: x.get() + box.right - r.right,
+      top: y.get() + box.top - r.top,
+      bottom: y.get() + box.bottom - r.bottom,
+    });
+  };
 
   return (
     <AnimatePresence>
@@ -68,9 +87,9 @@ export default function Draggable({
           className={`select-none ${
             tapOnly ? (onOpen ? "cursor-pointer" : "") : `touch-none active:cursor-grabbing ${onOpen ? "cursor-pointer" : "cursor-grab"}`
           } ${className}`}
-          style={{ ...style, zIndex: z ?? style?.zIndex }}
+          style={{ ...style, x, y, zIndex: z ?? style?.zIndex }}
           drag={!tapOnly}
-          dragConstraints={bounds}
+          dragConstraints={touch && bounds ? limits : bounds}
           dragElastic={0.15}
           dragTransition={{ power: 0.15, timeConstant: 180 }}
           initial={{ opacity: 0, scale: 0.6, rotate }}
@@ -78,7 +97,10 @@ export default function Draggable({
           exit={{ opacity: 0, scale: 0.1, transition: { duration: 0.25 } }}
           whileHover={{ scale: 1.03 }}
           whileDrag={{ scale: 1.06, rotate: rotate * 0.4, cursor: "grabbing" }}
-          onPointerDown={() => setZ(nextZ())}
+          onPointerDown={(e) => {
+            setZ(nextZ());
+            if (touch && !tapOnly) measureLimits(e.currentTarget);
+          }}
           onDragStart={() => {
             dragged.current = true;
           }}

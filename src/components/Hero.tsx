@@ -89,7 +89,7 @@ export default function Hero() {
   return (
     <section id="top" ref={ref} className="dots relative min-h-[max(100svh,760px)] overflow-hidden pt-[52px] lg:min-h-[900px]">
       {/* center copy */}
-      <div className="pointer-events-none relative z-0 flex min-h-[calc(100svh-52px)] flex-col items-center justify-center px-4 text-center lg:min-h-[848px]">
+      <div className="pointer-events-none relative z-0 flex min-h-[calc(max(100svh,760px)-52px)] flex-col items-center justify-center px-4 pb-[150px] pt-[200px] text-center lg:min-h-[848px] lg:py-0">
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -146,22 +146,22 @@ export default function Hero() {
       </div>
 
       {/* ---------- phone + tablet desk: smaller copies so the hero isn't bare ---------- */}
-      <FloatWindow id="m-photo" file="me.png" w={92} h={100} pos={{ left: "4%", top: "8%" }} bounds={ref} delay={0.1} rotate={-3} className="lg:hidden"
+      <FloatWindow id="m-photo" file="me.png" w={88} h={92} pos={{ left: "4%", top: 64 }} bounds={ref} delay={0.1} rotate={-3} className="lg:hidden"
         onOpen={() => openModal({ title: "me.png", content: <PhotoDetail />, width: 460 })}>
         <Photo src={profile.photo} alt={profile.name} caption={false} />
       </FloatWindow>
 
-      <Draggable touchDrag id="m-k1" label="^ ω ^" bounds={ref} style={{ position: "absolute", left: "37%", top: "12%" }} className="lg:hidden" delay={0.3}>
+      <Draggable touchDrag id="m-k1" label="^ ω ^" bounds={ref} style={{ position: "absolute", left: "37%", top: 92 }} className="lg:hidden" delay={0.3}>
         <Kaomoji start={0} />
       </Draggable>
 
-      <Draggable touchDrag id="m-mc-cat" label="minecraft cat" bounds={ref} style={{ position: "absolute", left: "34%", top: "83%" }} className="lg:hidden" delay={0.45} rotate={-3}
+      <Draggable touchDrag id="m-mc-cat" label="minecraft cat" bounds={ref} style={{ position: "absolute", left: "34%", bottom: 28 }} className="lg:hidden" delay={0.45} rotate={-3}
         title="do not disturb">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/media/minecraft-cat.png" alt="minecraft cat lying down" className="w-[120px] drop-shadow-[0_6px_6px_rgba(0,0,0,0.18)]" draggable={false} />
       </Draggable>
 
-      <Draggable touchDrag id="m-pdf" label="resume.pdf" bounds={ref} style={{ position: "absolute", right: "7%", top: "80%" }} className="lg:hidden" delay={0.65}
+      <Draggable touchDrag id="m-pdf" label="resume.pdf" bounds={ref} style={{ position: "absolute", right: "7%", bottom: 22 }} className="lg:hidden" delay={0.65}
         onOpen={() => window.open(profile.resume, "_blank")}>
         <PdfFile label="resume.pdf" />
       </Draggable>
@@ -172,7 +172,7 @@ export default function Hero() {
         <Photo src={profile.photo} alt={profile.name} />
       </FloatWindow>
 
-      <Draggable touchDrag id="nerd-cat" label="nerd cat" bounds={ref} style={{ position: "absolute", right: "4%", top: "8%" }} className="lg:!right-auto lg:!left-[23%] lg:!top-[10%]" delay={0.2} rotate={-4}
+      <Draggable touchDrag id="nerd-cat" label="nerd cat" bounds={ref} style={{ position: "absolute", right: "4%", top: 64 }} className="lg:!right-auto lg:!left-[23%] lg:!top-[10%]" delay={0.2} rotate={-4}
         title="um, actually…">
         <div className="w-[92px] bg-white p-1.5 pb-5 sm:w-[118px] shadow-[0_8px_18px_-8px_rgba(0,0,0,0.4)] ring-1 ring-black/5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -194,7 +194,7 @@ export default function Hero() {
         <Kaomoji start={3} />
       </Draggable>
 
-      <Draggable touchDrag id="ball" label="beach ball" bounds={ref} style={{ position: "absolute", left: "58%", top: "22%" }} className="lg:!left-[56%] lg:!top-[34%]" delay={0.5}>
+      <Draggable touchDrag id="ball" label="beach ball" bounds={ref} style={{ position: "absolute", left: "56%", top: 150 }} className="lg:!left-[56%] lg:!top-[34%]" delay={0.5}>
         <BeachBall className="h-7 w-7" />
       </Draggable>
 
@@ -219,7 +219,7 @@ export default function Hero() {
 
       <DeskTrash className={lg} style={{ position: "absolute", left: "calc(3% + 168px)", top: "47%" }} />
 
-      <Draggable touchDrag id="folder-projects" label="projects folder" bounds={ref} style={{ position: "absolute", left: "8%", top: "80%" }} className="lg:!left-[20%] lg:!top-[31%]" delay={0.6}
+      <Draggable touchDrag id="folder-projects" label="projects folder" bounds={ref} style={{ position: "absolute", left: "8%", bottom: 34 }} className="lg:!bottom-auto lg:!left-[20%] lg:!top-[31%]" delay={0.6}
         onOpen={() => openModal({ title: "projects", content: <ProjectsFinder />, width: 620 })} title="double the fun: click to open">
         <Folder className="h-[56px] w-[70px]" label="projects" />
       </Draggable>
